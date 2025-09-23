@@ -1,0 +1,188 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Core Tables based on CLAUDE.md specification
+model User {
+  id                    String    @id @default(cuid())
+  cognitoId            String    @unique
+  email                String    @unique
+  preferences          Json      @default("{}")
+  deletedAt            DateTime?
+  dataRetentionUntil   DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  // Relations
+  accounts             Account[]
+  categories           Category[]
+  budgets              Budget[]
+  gdprConsents         GdprConsent[]
+  gdprRequests         GdprRequest[]
+  auditLogs            AuditLog[]
+
+  @@map("users")
+}
+
+model Account {
+  id          String    @id @default(cuid())
+  userId      String
+  name        String
+  type        String
+  balance     Decimal   @default(0)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@map("accounts")
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  userId      String
+  name        String
+  type        String
+  color       String
+  isDefault   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions     Transaction[]
+  transactionSplits TransactionSplit[]
+  budgets          Budget[]
+
+  @@map("categories")
+}
+
+model Transaction {
+  id                   String    @id @default(cuid())
+  accountId            String
+  originalAmount       Decimal
+  description          String
+  date                 DateTime
+  isParent             Boolean   @default(false)
+  parentTransactionId  String?
+  categoryId           String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  // Relations
+  account              Account            @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  category             Category?          @relation(fields: [categoryId], references: [id])
+  parentTransaction    Transaction?       @relation("TransactionHierarchy", fields: [parentTransactionId], references: [id])
+  childTransactions    Transaction[]      @relation("TransactionHierarchy")
+  splits               TransactionSplit[]
+
+  @@map("transactions")
+}
+
+model TransactionSplit {
+  id            String   @id @default(cuid())
+  transactionId String
+  amount        Decimal
+  categoryId    String
+  description   String?
+  percentage    Decimal
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  category      Category    @relation(fields: [categoryId], references: [id])
+
+  @@map("transaction_splits")
+}
+
+model Budget {
+  id         String    @id @default(cuid())
+  userId     String
+  categoryId String
+  amount     Decimal
+  period     String
+  startDate  DateTime
+  isActive   Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  // Relations
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category   Category  @relation(fields: [categoryId], references: [id])
+
+  @@map("budgets")
+}
+
+// GDPR Compliance Tables
+model GdprConsent {
+  id           String    @id @default(cuid())
+  userId       String
+  consentType  String
+  granted      Boolean
+  grantedAt    DateTime?
+  withdrawnAt  DateTime?
+  version      String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relations
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("gdpr_consents")
+}
+
+model GdprRequest {
+  id          String    @id @default(cuid())
+  userId      String
+  requestType String
+  status      String
+  requestedAt DateTime  @default(now())
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("gdpr_requests")
+}
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  userId       String?
+  action       String
+  resourceType String
+  resourceId   String?
+  ipAddress    String?
+  timestamp    DateTime @default(now())
+  createdAt    DateTime @default(now())
+
+  // Relations
+  user         User?    @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}
+
+model DataRetentionPolicy {
+  id           String   @id @default(cuid())
+  dataType     String
+  retentionDays Int
+  autoDelete   Boolean  @default(false)
+  legalBasis   String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("data_retention_policies")
+}

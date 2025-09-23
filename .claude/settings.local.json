@@ -72,7 +72,10 @@
       "Bash(where uvx)",
       "Bash(where uv)",
       "Bash(uv:*)",
-      "Bash(uvx:*)"
+      "Bash(uvx:*)",
+      "Bash(tree:*)",
+      "Bash(npm install)",
+      "Bash(npm run typecheck:*)"
     ],
     "deny": [],
     "ask": []

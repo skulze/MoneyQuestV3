@@ -7,15 +7,40 @@
     "packages/*"
   ],
   "scripts": {
+    "install:all": "npm install && npm run install:packages",
+    "install:packages": "npm install --prefix packages/frontend && npm install --prefix packages/backend && npm install --prefix packages/shared && npm install --prefix packages/infrastructure",
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev:frontend": "npm run dev --prefix packages/frontend",
+    "dev:backend": "npm run dev --prefix packages/backend",
+    "dev:db": "echo 'Local PostgreSQL setup required'",
+    "build": "npm run build:shared && npm run build:backend && npm run build:frontend && npm run build:infrastructure",
+    "build:frontend": "npm run build --prefix packages/frontend",
+    "build:backend": "npm run build --prefix packages/backend",
+    "build:shared": "npm run build --prefix packages/shared",
+    "build:infrastructure": "npm run build --prefix packages/infrastructure",
+    "test": "npm run test:unit && npm run test:integration",
+    "test:unit": "echo 'Unit tests not configured yet'",
+    "test:integration": "echo 'Integration tests not configured yet'",
+    "test:e2e": "echo 'E2E tests not configured yet'",
+    "test:gdpr": "echo 'GDPR compliance tests not configured yet'",
+    "lint": "npm run lint:frontend && npm run lint:backend",
+    "lint:frontend": "npm run lint --prefix packages/frontend",
+    "lint:backend": "echo 'Backend linting not configured yet'",
+    "typecheck": "npm run typecheck:frontend && npm run typecheck:backend && npm run typecheck:shared",
+    "typecheck:frontend": "npm run typecheck --prefix packages/frontend",
+    "typecheck:backend": "npm run typecheck --prefix packages/backend",
+    "typecheck:shared": "npm run typecheck --prefix packages/shared",
+    "db:setup": "echo 'Database setup - Run PostgreSQL locally or use Docker'",
+    "db:migrate": "npm run db:migrate --prefix packages/backend",
+    "db:reset": "echo 'Database reset not configured yet'",
+    "db:studio": "npm run db:studio --prefix packages/backend",
     "security-audit": "semgrep --config=.semgrep.yml .",
     "security-scan": "semgrep --config=auto .",
     "security-scan-strict": "semgrep --config=.semgrep.yml --config=auto --error .",
     "security-ci": "semgrep --config=.semgrep.yml --config=auto --error --json --output=semgrep-results.json .",
-    "lint": "echo 'Linting not configured yet'",
-    "typecheck": "echo 'TypeScript checking not configured yet'",
-    "test": "echo 'Testing not configured yet'",
-    "build": "echo 'Build not configured yet'",
-    "dev": "echo 'Development server not configured yet'"
+    "deploy:staging": "npm run build && npm run cdk:deploy --prefix packages/infrastructure",
+    "deploy:prod": "npm run build && npm run cdk:deploy --prefix packages/infrastructure",
+    "deploy:rollback": "echo 'Rollback not configured yet'"
   },
   "keywords": [
     "personal-finance",
@@ -26,7 +51,11 @@
   ],
   "author": "MoneyQuestV3 Team",
   "license": "UNLICENSED",
-  "devDependencies": {},
+  "devDependencies": {
+    "concurrently": "^8.2.0",
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
+  },
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=8.0.0"
