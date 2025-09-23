@@ -1,7 +1,7 @@
 # MoneyQuestV3 - Personal Finance App
 
 ## Project Overview
-A GDPR & SOC 2 Type II compliant personal finance web application that enables users to track spending, split transactions across multiple categories, and analyze financial patterns through a hybrid client-server analytics architecture.
+A GDPR & SOC 2 Type II compliant personal finance web application that enables users to track spending, budget, make goals, and analyze financial patterns through a hybrid client-server analytics architecture.
 
 **Core Value Proposition:**
 - **Understand exactly where your money goes** - Get instant, accurate insights into your spending patterns without waiting for reports or manual calculations
