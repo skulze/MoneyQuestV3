@@ -1,0 +1,48 @@
+# Semgrep ignore patterns for MoneyQuestV3
+
+# Dependencies
+node_modules/
+.pnpm-store/
+.yarn/
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment files
+.env*
+
+# CDK outputs
+cdk.out/
+
+# Logs
+*.log
+logs/
+
+# Cache directories
+.cache/
+.turbo/
+
+# Test coverage
+coverage/
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Prisma generated files
+packages/backend/prisma/generated/
+
+# Documentation that doesn't need security scanning
+docs/

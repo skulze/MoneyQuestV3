@@ -1,0 +1,34 @@
+{
+  "name": "moneyquest-v3",
+  "version": "1.0.0",
+  "description": "GDPR & SOC 2 Type II compliant personal finance web application",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "security-audit": "semgrep --config=.semgrep.yml .",
+    "security-scan": "semgrep --config=auto .",
+    "security-scan-strict": "semgrep --config=.semgrep.yml --config=auto --error .",
+    "security-ci": "semgrep --config=.semgrep.yml --config=auto --error --json --output=semgrep-results.json .",
+    "lint": "echo 'Linting not configured yet'",
+    "typecheck": "echo 'TypeScript checking not configured yet'",
+    "test": "echo 'Testing not configured yet'",
+    "build": "echo 'Build not configured yet'",
+    "dev": "echo 'Development server not configured yet'"
+  },
+  "keywords": [
+    "personal-finance",
+    "budgeting",
+    "transaction-tracking",
+    "gdpr-compliant",
+    "soc2-compliant"
+  ],
+  "author": "MoneyQuestV3 Team",
+  "license": "UNLICENSED",
+  "devDependencies": {},
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  }
+}

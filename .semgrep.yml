@@ -1,0 +1,154 @@
+rules:
+  # Security rules for MoneyQuestV3 personal finance app
+
+  # Prevent hardcoded secrets
+  - id: hardcoded-secrets
+    patterns:
+      - pattern-either:
+          - pattern: |
+              const $VAR = "$SECRET"
+          - pattern: |
+              let $VAR = "$SECRET"
+          - pattern: |
+              var $VAR = "$SECRET"
+          - pattern: |
+              $VAR = "$SECRET"
+    metavariable-regex:
+      SECRET: (.*(?i)(password|secret|key|token|api_key|access_key|private_key|jwt).*)
+    message: "Potential hardcoded secret detected"
+    languages: [typescript, javascript]
+    severity: ERROR
+
+  # AWS credentials detection
+  - id: aws-credentials
+    patterns:
+      - pattern-either:
+          - pattern: |
+              const $VAR = "AKIA..."
+          - pattern: |
+              let $VAR = "AKIA..."
+          - pattern: |
+              "$VAR": "AKIA..."
+    message: "AWS Access Key detected - use environment variables or IAM roles"
+    languages: [typescript, javascript, json]
+    severity: ERROR
+
+  # SQL injection prevention (for raw queries)
+  - id: sql-injection-risk
+    patterns:
+      - pattern: |
+          $DB.query($QUERY + $USER_INPUT)
+      - pattern: |
+          $DB.execute($QUERY + $USER_INPUT)
+      - pattern: |
+          $DB.raw($QUERY + $USER_INPUT)
+    message: "Potential SQL injection vulnerability - use parameterized queries"
+    languages: [typescript, javascript]
+    severity: ERROR
+
+  # Ensure HTTPS only
+  - id: http-url-detected
+    patterns:
+      - pattern: |
+          "http://..."
+    message: "HTTP URL detected - use HTTPS for security"
+    languages: [typescript, javascript, json]
+    severity: WARNING
+
+  # Prevent console.log in production
+  - id: console-log-production
+    patterns:
+      - pattern: console.log(...)
+      - pattern: console.error(...)
+      - pattern: console.warn(...)
+    message: "Console statements should be removed for production"
+    languages: [typescript, javascript]
+    severity: INFO
+    paths:
+      exclude:
+        - "*.test.*"
+        - "*.spec.*"
+        - "**/test/**"
+        - "**/tests/**"
+
+  # Prevent eval usage
+  - id: dangerous-eval
+    patterns:
+      - pattern: eval(...)
+      - pattern: Function(...)
+      - pattern: setTimeout($STR, ...)
+      - pattern: setInterval($STR, ...)
+    message: "Dangerous eval-like function usage detected"
+    languages: [typescript, javascript]
+    severity: ERROR
+
+  # Check for missing error handling in async functions
+  - id: missing-async-error-handling
+    patterns:
+      - pattern: |
+          async function $FUNC(...) {
+            ...
+            await $EXPR
+            ...
+          }
+    pattern-not-inside:
+      - pattern: |
+          try {
+            ...
+          } catch (...) {
+            ...
+          }
+    message: "Async function missing error handling - wrap in try-catch"
+    languages: [typescript, javascript]
+    severity: WARNING
+
+  # GDPR compliance - ensure user data is handled properly
+  - id: gdpr-user-data-logging
+    patterns:
+      - pattern-either:
+          - pattern: console.log(..., $USER_DATA, ...)
+          - pattern: logger.log(..., $USER_DATA, ...)
+          - pattern: console.error(..., $USER_DATA, ...)
+    metavariable-regex:
+      USER_DATA: .*(email|ssn|phone|address|name|user).*
+    message: "Potential PII logging detected - ensure GDPR compliance"
+    languages: [typescript, javascript]
+    severity: WARNING
+
+  # Financial data protection
+  - id: financial-data-exposure
+    patterns:
+      - pattern-either:
+          - pattern: console.log(..., $FINANCIAL, ...)
+          - pattern: logger.log(..., $FINANCIAL, ...)
+    metavariable-regex:
+      FINANCIAL: .*(amount|balance|transaction|account|card).*
+    message: "Potential financial data logging - review for security"
+    languages: [typescript, javascript]
+    severity: ERROR
+
+  # Ensure environment variables are used for configuration
+  - id: missing-env-config
+    patterns:
+      - pattern-either:
+          - pattern: |
+              const $CONFIG = {
+                ...,
+                apiKey: "...",
+                ...
+              }
+          - pattern: |
+              const $CONFIG = {
+                ...,
+                secret: "...",
+                ...
+              }
+          - pattern: |
+              const $CONFIG = {
+                ...,
+                password: "...",
+                ...
+              }
+    message: "Configuration should use environment variables"
+    languages: [typescript, javascript]
+    severity: WARNING

@@ -466,12 +466,10 @@ class AnalyticsEngine {
 ## Deployment
 
 ### Staging Environment
-- **URL:** [STAGING_URL_TBD]
 - **Database:** Separate Aurora cluster
 - **Purpose:** QA testing and GDPR compliance validation
 
 ### Production Environment
-- **URL:** [PRODUCTION_URL_TBD]
 - **Database:** Production Aurora cluster with backups
 - **Monitoring:** 24/7 uptime monitoring and alerting
 
@@ -490,7 +488,7 @@ class AnalyticsEngine {
 - Maximum 10 splits per transaction
 - Report generation limited to 2 years of data
 - Offline mode requires initial data sync
-- EU-only deployment due to GDPR requirements
+
 
 ## Troubleshooting
 
