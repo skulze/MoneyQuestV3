@@ -59,7 +59,20 @@
       "Bash(pip --version)",
       "Bash(\"C:\\Users\\natha\\AppData\\Local\\Programs\\Python\\Python313\\Scripts\\mcp.exe\" status)",
       "Read(//c/Python313/**)",
-      "Bash(\"/c/Users/natha/AppData/Local/Programs/Python/Python313/python.exe\" -m pip --version)"
+      "Bash(\"/c/Users/natha/AppData/Local/Programs/Python/Python313/python.exe\" -m pip --version)",
+      "Bash(export:*)",
+      "Bash(alias python='/c/Users/natha/AppData/Local/Microsoft/WindowsApps/python.exe')",
+      "Bash(alias pip='/c/Users/natha/AppData/Local/Microsoft/WindowsApps/python.exe -m pip')",
+      "Bash(cat:*)",
+      "Bash(rm:*)",
+      "Read(//c/Users/natha/**)",
+      "Bash(/c/Python313/python.exe -c \"import sys; print(''Prefix:'', sys.prefix); print(''Working!'')\")",
+      "Bash(python:*)",
+      "Bash(claude mcp:*)",
+      "Bash(where uvx)",
+      "Bash(where uv)",
+      "Bash(uv:*)",
+      "Bash(uvx:*)"
     ],
     "deny": [],
     "ask": []
