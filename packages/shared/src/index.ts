@@ -3,6 +3,13 @@ export * from './types/transactions';
 export * from './types/analytics';
 export * from './types/gdpr';
 
+// Export data engine components
+export * from './data-engine/LocalDataEngine';
+export * from './data-engine/SubscriptionManager';
+export * from './data-engine/BackupService';
+export * from './data-engine/OCRService';
+export * from './data-engine/PlaidService';
+
 // Common utility types
 export interface ApiResponse<T = any> {
   success: boolean;

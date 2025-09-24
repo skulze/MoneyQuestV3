@@ -10,9 +10,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "moneyquest-v3": "file:../..",
     "zod": "^3.22.0"
   },
   "devDependencies": {
+    "@types/node": "^24.5.2",
     "typescript": "^5.0.0"
   }
 }

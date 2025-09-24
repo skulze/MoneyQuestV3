@@ -15,11 +15,12 @@
   },
   "dependencies": {
     "aws-cdk-lib": "2.100.0",
-    "constructs": "^10.0.0"
+    "constructs": "^10.0.0",
+    "moneyquest-v3": "file:../.."
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
-    "typescript": "^5.0.0",
-    "aws-cdk": "2.100.0"
+    "aws-cdk": "2.100.0",
+    "typescript": "^5.0.0"
   }
 }

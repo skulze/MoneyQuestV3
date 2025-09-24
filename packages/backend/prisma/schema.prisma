@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -15,7 +15,7 @@ model User {
   id                    String    @id @default(cuid())
   cognitoId            String    @unique
   email                String    @unique
-  preferences          Json      @default("{}")
+  preferences          String    @default("{}")
   deletedAt            DateTime?
   dataRetentionUntil   DateTime?
   createdAt            DateTime  @default(now())
@@ -28,6 +28,19 @@ model User {
   gdprConsents         GdprConsent[]
   gdprRequests         GdprRequest[]
   auditLogs            AuditLog[]
+  subscription         Subscription?
+  portfolios           Portfolio[]
+  netWorthSnapshots    NetWorthSnapshot[]
+  userRelationships    UserRelationship[] @relation("UserRelationships")
+  relatedUserRelationships UserRelationship[] @relation("RelatedUserRelationships")
+  ownedSharedBudgets   SharedBudget[] @relation("OwnedSharedBudgets")
+  sharedBudgets        SharedBudget[] @relation("SharedBudgets")
+  ocrReceipts          OcrReceipt[]
+  plaidAccounts        PlaidAccount[]
+  plaidTransactions    PlaidTransaction[]
+  payments             Payment[]
+  usageEvents          UsageEvent[]
+  conversionTriggers   ConversionTrigger[]
 
   @@map("users")
 }
@@ -38,12 +51,14 @@ model Account {
   name        String
   type        String
   balance     Decimal   @default(0)
+  currencyId  String    @default("usd")
   isActive    Boolean   @default(true)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
   // Relations
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  currency     Currency      @relation(fields: [currencyId], references: [id])
   transactions Transaction[]
 
   @@map("accounts")
@@ -74,6 +89,7 @@ model Transaction {
   originalAmount       Decimal
   description          String
   date                 DateTime
+  currencyId           String    @default("usd")
   isParent             Boolean   @default(false)
   parentTransactionId  String?
   categoryId           String?
@@ -82,6 +98,7 @@ model Transaction {
 
   // Relations
   account              Account            @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  currency             Currency           @relation(fields: [currencyId], references: [id])
   category             Category?          @relation(fields: [categoryId], references: [id])
   parentTransaction    Transaction?       @relation("TransactionHierarchy", fields: [parentTransactionId], references: [id])
   childTransactions    Transaction[]      @relation("TransactionHierarchy")
@@ -112,6 +129,7 @@ model Budget {
   userId     String
   categoryId String
   amount     Decimal
+  currencyId String    @default("usd")
   period     String
   startDate  DateTime
   isActive   Boolean   @default(true)
@@ -119,8 +137,10 @@ model Budget {
   updatedAt  DateTime  @updatedAt
 
   // Relations
-  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  category   Category  @relation(fields: [categoryId], references: [id])
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category     Category     @relation(fields: [categoryId], references: [id])
+  currency     Currency     @relation(fields: [currencyId], references: [id])
+  sharedBudgets SharedBudget[]
 
   @@map("budgets")
 }
@@ -185,4 +205,254 @@ model DataRetentionPolicy {
   updatedAt    DateTime @updatedAt
 
   @@map("data_retention_policies")
+}
+
+// Subscription Management
+model Subscription {
+  id                  String    @id @default(cuid())
+  userId              String    @unique
+  stripeSubscriptionId String?  @unique
+  tier                String    // 'free', 'plus', 'premium'
+  status              String    // 'active', 'canceled', 'past_due'
+  expiresAt           DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  // Relations
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+// Multi-Currency Support
+model Currency {
+  id        String   @id @default(cuid())
+  code      String   @unique // USD, EUR, etc.
+  name      String   // US Dollar, Euro, etc.
+  symbol    String   // $, €, etc.
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  accounts         Account[]
+  transactions     Transaction[]
+  budgets          Budget[]
+  exchangeRatesFrom ExchangeRate[] @relation("FromCurrency")
+  exchangeRatesTo   ExchangeRate[] @relation("ToCurrency")
+
+  @@map("currencies")
+}
+
+model ExchangeRate {
+  id             String   @id @default(cuid())
+  fromCurrencyId String
+  toCurrencyId   String
+  rate           Decimal
+  date           DateTime
+  createdAt      DateTime @default(now())
+
+  // Relations
+  fromCurrency   Currency @relation("FromCurrency", fields: [fromCurrencyId], references: [id])
+  toCurrency     Currency @relation("ToCurrency", fields: [toCurrencyId], references: [id])
+
+  @@map("exchange_rates")
+}
+
+// Investment Tracking (Manual for all users)
+model Portfolio {
+  id            String   @id @default(cuid())
+  userId        String
+  name          String
+  provider      String?  // "Manual", "Fidelity", "TD Ameritrade"
+  accountNumber String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  investments   Investment[]
+
+  @@map("portfolios")
+}
+
+model Investment {
+  id           String  @id @default(cuid())
+  portfolioId  String
+  symbol       String  // AAPL, TSLA, etc.
+  name         String  // Apple Inc., Tesla Inc.
+  quantity     Decimal
+  costBasis    Decimal // Total cost basis
+  currentPrice Decimal @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  portfolio    Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@map("investments")
+}
+
+model NetWorthSnapshot {
+  id               String   @id @default(cuid())
+  userId           String
+  totalAssets      Decimal
+  totalLiabilities Decimal
+  netWorth         Decimal
+  date             DateTime
+  createdAt        DateTime @default(now())
+
+  // Relations
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("net_worth_snapshots")
+}
+
+// Plus/Premium: Multi-User Collaboration
+model UserRelationship {
+  id              String   @id @default(cuid())
+  userId          String
+  relatedUserId   String
+  relationshipType String  // 'spouse', 'child', 'partner'
+  status          String   // 'pending', 'accepted', 'declined'
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  user            User     @relation("UserRelationships", fields: [userId], references: [id], onDelete: Cascade)
+  relatedUser     User     @relation("RelatedUserRelationships", fields: [relatedUserId], references: [id], onDelete: Cascade)
+
+  @@map("user_relationships")
+}
+
+model SharedBudget {
+  id              String   @id @default(cuid())
+  budgetId        String
+  ownerUserId     String
+  sharedUserId    String
+  permissionLevel String   // 'read', 'write'
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  budget          Budget   @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  owner           User     @relation("OwnedSharedBudgets", fields: [ownerUserId], references: [id], onDelete: Cascade)
+  sharedUser      User     @relation("SharedBudgets", fields: [sharedUserId], references: [id], onDelete: Cascade)
+
+  @@map("shared_budgets")
+}
+
+// Plus/Premium: OCR Receipt Processing
+model OcrReceipt {
+  id              String   @id @default(cuid())
+  userId          String
+  imageUrl        String
+  processedText   String?
+  confidenceScore Float?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions    OcrTransaction[]
+
+  @@map("ocr_receipts")
+}
+
+model OcrTransaction {
+  id              String   @id @default(cuid())
+  ocrReceiptId    String
+  amount          Decimal
+  merchant        String
+  category        String?
+  userConfirmed   Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  ocrReceipt      OcrReceipt @relation(fields: [ocrReceiptId], references: [id], onDelete: Cascade)
+
+  @@map("ocr_transactions")
+}
+
+// Premium: Plaid Bank Integration
+model PlaidAccount {
+  id              String   @id @default(cuid())
+  userId          String
+  plaidAccountId  String   @unique
+  institutionName String
+  accountType     String   // 'checking', 'savings', 'credit'
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions    PlaidTransaction[]
+
+  @@map("plaid_accounts")
+}
+
+model PlaidTransaction {
+  id              String   @id @default(cuid())
+  userId          String
+  plaidAccountId  String
+  amount          Decimal
+  date            DateTime
+  merchant        String?
+  category        String?
+  pending         Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plaidAccount    PlaidAccount @relation(fields: [plaidAccountId], references: [id], onDelete: Cascade)
+
+  @@map("plaid_transactions")
+}
+
+// Analytics & Conversion
+model Payment {
+  id                    String   @id @default(cuid())
+  userId                String
+  stripePaymentIntentId String   @unique
+  amount                Decimal
+  status                String   // 'pending', 'succeeded', 'failed'
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  // Relations
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}
+
+model UsageEvent {
+  id        String   @id @default(cuid())
+  userId    String?
+  eventType String   // 'transaction_added', 'report_generated', 'ocr_used'
+  eventData String?  // JSON data
+  createdAt DateTime @default(now())
+
+  // Relations
+  user      User?    @relation(fields: [userId], references: [id])
+
+  @@map("usage_events")
+}
+
+model ConversionTrigger {
+  id          String    @id @default(cuid())
+  userId      String
+  triggerType String    // 'account_limit', 'feature_blocked', 'report_limit'
+  shownAt     DateTime  @default(now())
+  convertedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("conversion_triggers")
 }

@@ -75,7 +75,17 @@
       "Bash(uvx:*)",
       "Bash(tree:*)",
       "Bash(npm install)",
-      "Bash(npm run typecheck:*)"
+      "Bash(npm run typecheck:*)",
+      "Bash(npm run install:packages:*)",
+      "Bash(npx expo:*)",
+      "Bash(npm install:*)",
+      "Bash(find:*)",
+      "Bash(npm run:*)",
+      "Bash(timeout 10s npm run dev)",
+      "Bash(timeout 15s npx expo start --web)",
+      "Bash(\"C:\\Users\\natha\\AppData\\Local\\Programs\\Python\\Python313\\Scripts\\mcp.exe\" --help)",
+      "Bash(npx playwright install:*)",
+      "Bash(npx playwright test:*)"
     ],
     "deny": [],
     "ask": []
