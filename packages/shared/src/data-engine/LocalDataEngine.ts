@@ -67,13 +67,25 @@ export class LocalDataEngine {
   private hasUnsyncedChanges: boolean = false;
 
   constructor(
-    localDB: LocalDB,
-    subscription: SubscriptionManager,
-    backupService: BackupService
+    localDB?: LocalDB,
+    subscription?: SubscriptionManager,
+    backupService?: BackupService
   ) {
+    this.localDB = localDB!;
+    this.subscription = subscription!;
+    this.backupService = backupService!;
+  }
+
+  // Initialize the data engine with required dependencies
+  initialize(localDB: LocalDB, subscription: SubscriptionManager, backupService: BackupService) {
     this.localDB = localDB;
     this.subscription = subscription;
     this.backupService = backupService;
+  }
+
+  // Check if the engine is properly initialized
+  private isInitialized(): boolean {
+    return !!this.localDB && !!this.subscription && !!this.backupService;
   }
 
   // ==========================================
@@ -267,6 +279,224 @@ export class LocalDataEngine {
 
     this.hasUnsyncedChanges = true;
     return updated;
+  }
+
+  // ==========================================
+  // Portfolio Management (All Users)
+  // ==========================================
+
+  async createPortfolio(userId: string, portfolioData: any): Promise<any> {
+    const newPortfolio = await this.localDB.insert('portfolios', {
+      id: this.generateId(),
+      userId,
+      ...portfolioData,
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    this.hasUnsyncedChanges = true;
+    return newPortfolio;
+  }
+
+  async getPortfolios(userId: string): Promise<any[]> {
+    if (!this.isInitialized()) {
+      console.warn('LocalDataEngine not initialized, returning empty portfolios');
+      return [];
+    }
+    return this.localDB.query('portfolios', { userId, isActive: true });
+  }
+
+  async updatePortfolio(id: string, update: any): Promise<any> {
+    const updated = await this.localDB.update('portfolios', id, {
+      ...update,
+      updatedAt: new Date(),
+    });
+
+    this.hasUnsyncedChanges = true;
+    return updated;
+  }
+
+  async deletePortfolio(id: string): Promise<void> {
+    await this.localDB.update('portfolios', id, {
+      isActive: false,
+      updatedAt: new Date(),
+    });
+
+    this.hasUnsyncedChanges = true;
+  }
+
+  // ==========================================
+  // Investment Management (All Users)
+  // ==========================================
+
+  async createInvestment(portfolioId: string, investmentData: any): Promise<any> {
+    const newInvestment = await this.localDB.insert('investments', {
+      id: this.generateId(),
+      portfolioId,
+      ...investmentData,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    this.hasUnsyncedChanges = true;
+    return newInvestment;
+  }
+
+  async getInvestments(portfolioId?: string): Promise<any[]> {
+    if (portfolioId) {
+      return this.localDB.query('investments', { portfolioId });
+    }
+    return this.localDB.query('investments', {});
+  }
+
+  async updateInvestment(id: string, update: any): Promise<any> {
+    const updated = await this.localDB.update('investments', id, {
+      ...update,
+      updatedAt: new Date(),
+    });
+
+    this.hasUnsyncedChanges = true;
+    return updated;
+  }
+
+  async deleteInvestment(id: string): Promise<void> {
+    await this.localDB.delete('investments', id);
+    this.hasUnsyncedChanges = true;
+  }
+
+  async getPortfolioWithInvestments(portfolioId: string): Promise<any> {
+    const portfolios = await this.localDB.query('portfolios', { id: portfolioId });
+    const investments = await this.getInvestments(portfolioId);
+
+    if (!portfolios.length) return null;
+
+    const portfolio = portfolios[0];
+    return Object.assign({}, portfolio, { investments });
+  }
+
+  async getAllPortfoliosWithInvestments(userId: string): Promise<any[]> {
+    if (!this.isInitialized()) {
+      console.warn('LocalDataEngine not initialized, returning empty portfolios with investments');
+      return [];
+    }
+
+    const portfolios = await this.getPortfolios(userId);
+
+    const portfoliosWithInvestments = await Promise.all(
+      portfolios.map(async (portfolio) => {
+        const investments = await this.getInvestments(portfolio.id);
+        return {
+          ...portfolio,
+          investments
+        };
+      })
+    );
+
+    return portfoliosWithInvestments;
+  }
+
+  // ==========================================
+  // Investment Analytics (All Users)
+  // ==========================================
+
+  async calculatePortfolioPerformance(portfolioId: string): Promise<any> {
+    const investments = await this.getInvestments(portfolioId);
+
+    let totalCurrentValue = 0;
+    let totalCostBasis = 0;
+
+    for (const investment of investments) {
+      const currentValue = Number(investment.quantity) * Number(investment.currentPrice);
+      const costBasis = Number(investment.quantity) * Number(investment.costBasis);
+
+      totalCurrentValue += currentValue;
+      totalCostBasis += costBasis;
+    }
+
+    const gainLoss = totalCurrentValue - totalCostBasis;
+    const gainLossPercent = totalCostBasis > 0 ? (gainLoss / totalCostBasis) * 100 : 0;
+
+    return {
+      totalCurrentValue,
+      totalCostBasis,
+      gainLoss,
+      gainLossPercent,
+      investmentCount: investments.length
+    };
+  }
+
+  async calculateTotalPortfolioValue(userId: string): Promise<any> {
+    const portfolios = await this.getAllPortfoliosWithInvestments(userId);
+
+    let totalValue = 0;
+    let totalCostBasis = 0;
+    let totalInvestments = 0;
+
+    for (const portfolio of portfolios) {
+      for (const investment of portfolio.investments) {
+        const currentValue = Number(investment.quantity) * Number(investment.currentPrice);
+        const costBasis = Number(investment.quantity) * Number(investment.costBasis);
+
+        totalValue += currentValue;
+        totalCostBasis += costBasis;
+        totalInvestments++;
+      }
+    }
+
+    const gainLoss = totalValue - totalCostBasis;
+    const gainLossPercent = totalCostBasis > 0 ? (gainLoss / totalCostBasis) * 100 : 0;
+
+    return {
+      totalValue,
+      totalCostBasis,
+      gainLoss,
+      gainLossPercent,
+      portfolioCount: portfolios.length,
+      totalInvestments
+    };
+  }
+
+  async getAssetAllocation(userId: string): Promise<any[]> {
+    const portfolios = await this.getAllPortfoliosWithInvestments(userId);
+    const assetTypes: { [key: string]: number } = {};
+    let totalValue = 0;
+
+    for (const portfolio of portfolios) {
+      for (const investment of portfolio.investments) {
+        const currentValue = Number(investment.quantity) * Number(investment.currentPrice);
+        const assetType = this.categorizeAssetType(investment.symbol);
+
+        assetTypes[assetType] = (assetTypes[assetType] || 0) + currentValue;
+        totalValue += currentValue;
+      }
+    }
+
+    return Object.entries(assetTypes).map(([type, value]) => ({
+      type,
+      value,
+      percentage: totalValue > 0 ? (value / totalValue) * 100 : 0
+    }));
+  }
+
+  private categorizeAssetType(symbol: string): string {
+    // Simple categorization - can be enhanced
+    const upperSymbol = symbol.toUpperCase();
+
+    if (upperSymbol.includes('BTC') || upperSymbol.includes('ETH') || upperSymbol.includes('CRYPTO')) {
+      return 'Cryptocurrency';
+    }
+    if (upperSymbol.includes('BND') || upperSymbol.includes('BOND') || upperSymbol.includes('TLT')) {
+      return 'Bonds';
+    }
+    if (upperSymbol.includes('VTI') || upperSymbol.includes('VXUS') || upperSymbol.includes('ETF')) {
+      return 'ETF';
+    }
+    if (upperSymbol.length <= 4) {
+      return 'Stocks';
+    }
+
+    return 'Other';
   }
 
   // ==========================================

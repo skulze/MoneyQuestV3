@@ -1,22 +1,24 @@
 # MoneyQuestV3 - Personal Finance App
 
 ## Project Overview
-Local-first personal finance app with 3-tier freemium model. Built with Next.js + React Native, SQLite/IndexedDB for local storage, and session-based encrypted cloud backup.
+Local-first personal finance app with 3-tier freemium model. Built with Next.js PWA architecture, IndexedDB for local storage, and session-based encrypted cloud backup.
 
 **Core Architecture:**
 - **Local-first**: 99% of operations happen offline with instant performance
 - **Privacy-focused**: User data stays on device, encrypted backups only
-- **Cross-platform**: Web (Next.js) + Mobile (React Native + Expo)
+- **Cross-platform**: Progressive Web App (PWA) - Web + Mobile via "Add to Home Screen"
 - **Freemium**: Free (single-user) → Plus ($2.99, multi-user + OCR) → Premium ($9.99, bank automation)
+- **Zero App Store Fees**: PWA architecture saves 30% commission on all subscriptions
 
 ## Architecture & Tech Stack
 
-### Frontend
-- **Website**: Next.js 14 + TypeScript + Tailwind CSS + Zustand
-- **Mobile**: React Native + TypeScript + Expo + AsyncStorage
-- **Local Database**: SQLite (mobile), IndexedDB (web)
-- **Analytics**: Chart.js (web), React Native Charts (mobile)
+### Frontend (PWA Architecture)
+- **Progressive Web App**: Next.js 14 + TypeScript + Tailwind CSS + Zustand
+- **Mobile Experience**: Responsive web design + "Add to Home Screen" functionality
+- **Local Database**: IndexedDB (universal - works on all platforms)
+- **Analytics**: Chart.js + Recharts (responsive charts for all devices)
 - **Reports**: jsPDF, SheetJS (client-side generation)
+- **PWA Features**: Service workers, offline support, app-like experience
 
 ### Backend (Minimal)
 - **Functions**: AWS Lambda + TypeScript + Function URLs
@@ -48,7 +50,7 @@ Local-first personal finance app with 3-tier freemium model. Built with Next.js 
 - Manual investment tracking
 - PDF/Excel reports
 - Multi-currency support
-- Mobile apps with offline sync
+- PWA mobile experience with offline sync
 
 ### ➕ Plus Tier - $2.99/month
 **Everything in Free plus:**
@@ -66,10 +68,35 @@ Local-first personal finance app with 3-tier freemium model. Built with Next.js 
 - Tax optimization features
 - Professional integrations (QuickBooks, TurboTax)
 
-**Unit Economics:**
-- Plus: $2.99 revenue - $0.30 costs = $2.69 profit (90% margin)
-- Premium: $9.99 revenue - $1.45 costs = $8.54 profit (85% margin)
+**Unit Economics (PWA Advantage):**
+- Plus: $2.99 revenue - $0.30 costs = $2.69 profit (90% margin vs 63% with App Store)
+- Premium: $9.99 revenue - $1.45 costs = $8.54 profit (85% margin vs 59% with App Store)
+- **Annual savings**: $10,000-30,000 in App Store fees with 1,000 users
 - Target: 75% Free, 15% Plus, 10% Premium
+
+## PWA Strategy & Benefits
+
+### **Why PWA Over Native Apps**
+- **Zero App Store Fees**: Save 30% commission on all subscriptions
+- **Instant Deployment**: No app store approval process
+- **Universal Compatibility**: Works on all platforms (iOS, Android, Desktop)
+- **Reduced Development Cost**: Single codebase for all platforms
+- **Privacy Advantage**: No app store tracking or data requirements
+
+### **PWA Implementation Features**
+- **Add to Home Screen**: Native app-like icon and experience
+- **Offline Functionality**: Full local-first operation without internet
+- **Service Workers**: Background sync and caching for performance
+- **Web Push Notifications**: Cross-platform notification system
+- **Responsive Design**: Mobile-first UI optimized for touch interactions
+- **App-Like Navigation**: Native-feeling navigation and transitions
+
+### **Target User Behavior**
+- Users discover via web search or social sharing
+- Try the app instantly (no download required)
+- Add to home screen when they find value
+- Experience feels native but maintains web flexibility
+- Share specific features via URLs (viral growth potential)
 
 ## Development Setup
 
@@ -82,8 +109,7 @@ npm install
 npm run db:setup && npm run db:migrate && npm run db:seed
 
 # Start development servers
-npm run dev:website    # Next.js website on port 3000
-npm run dev:mobile     # React Native Expo development server
+npm run dev:website    # PWA development server on port 3000
 npm run dev:backend    # Local Lambda simulation
 ```
 
@@ -153,11 +179,12 @@ conversion_triggers (id, user_id, trigger_type, shown_at, converted_at)
 ```
 MoneyQuestV3/
 ├── packages/
-│   ├── website/              # Next.js web application
-│   ├── mobile/               # React Native mobile app
+│   ├── website/              # Next.js PWA application (universal - web + mobile)
 │   ├── backend/              # Lambda functions
 │   ├── shared/               # Shared TypeScript types
 │   └── infrastructure/       # AWS CDK
+├── archived/
+│   └── mobile/               # Archived React Native package (PWA replaced this)
 ├── docs/                     # Documentation
 ├── scripts/                  # Build and deployment scripts
 └── .github/workflows/        # CI/CD pipelines
@@ -167,7 +194,7 @@ MoneyQuestV3/
 
 ```typescript
 class LocalDataEngine {
-  localDB: SQLiteDB // Mobile: SQLite, Web: IndexedDB
+  localDB: IndexedDB // Universal: IndexedDB for PWA (web + mobile)
   subscription: SubscriptionManager
 
   // Core operations (instant, local)
@@ -237,12 +264,14 @@ class SubscriptionManager {
 - **Input validation**: Server-side validation for all inputs
 - **Database security**: Prisma ORM prevents SQL injection
 
-### Performance Targets
-- **Initial Load**: < 2 seconds (web), < 3 seconds (mobile)
+### Performance Targets (PWA)
+- **Initial Load**: < 2 seconds (all devices)
+- **Add to Home Screen**: < 1 second app-like experience
 - **Local Operations**: Instant (no API calls for daily use)
 - **Report Generation**: Instant (client-side generation)
 - **Session Backup**: < 5 seconds
 - **Multi-device Sync**: Within hours
+- **Offline Mode**: Full functionality without internet
 
 ### Compliance Notes
 - **GDPR basics**: User consent, data export, account deletion
@@ -266,7 +295,8 @@ npm run security-audit # Vulnerability scanning
 ## Known Limitations
 - Maximum 10 splits per transaction
 - Report generation limited to 2 years of data
-- Offline mode requires initial sync (mobile)
+- PWA installation requires user education ("Add to Home Screen")
+- iOS Safari has limited PWA notification support
 
 ---
 **Status**: Development Phase | **Architecture**: Local-First | **Target**: 10k users, $12k+ monthly profit

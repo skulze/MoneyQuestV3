@@ -85,7 +85,20 @@
       "Bash(timeout 15s npx expo start --web)",
       "Bash(\"C:\\Users\\natha\\AppData\\Local\\Programs\\Python\\Python313\\Scripts\\mcp.exe\" --help)",
       "Bash(npx playwright install:*)",
-      "Bash(npx playwright test:*)"
+      "Bash(npx playwright test:*)",
+      "mcp__Ref__ref_search_documentation",
+      "mcp__Ref__ref_read_url",
+      "Bash(PLAYWRIGHT_BASE_URL=http://localhost:3001 npx playwright test tests/pricing-page-debug.spec.js --headed)",
+      "Bash(PLAYWRIGHT_BASE_URL=http://localhost:3001 npx playwright test tests/billing-upgrade-buttons.spec.js --headed)",
+      "Bash(timeout 30s npx playwright test tests/pricing-page-debug.spec.js --reporter=line)",
+      "Bash(PLAYWRIGHT_BASE_URL=http://localhost:3004 npx playwright test tests/pricing-page-debug.spec.js --reporter=line)",
+      "Bash(pkill:*)",
+      "Bash(timeout 30s npx playwright test tests/subscription-feature-gating.spec.js --reporter=line --base-url=http://localhost:3004)",
+      "Bash(PLAYWRIGHT_BASE_URL=http://localhost:3004 timeout 30s npx playwright test tests/subscription-feature-gating.spec.js --reporter=line)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)",
+      "Bash(tasklist)"
     ],
     "deny": [],
     "ask": []

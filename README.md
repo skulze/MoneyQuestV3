@@ -1,6 +1,6 @@
-# MoneyQuestV3 - Personal Finance App
+# MoneyQuestV3 - Personal Finance Progressive Web App
 
-A GDPR & SOC 2 Type II compliant personal finance web application that enables users to track spending, split transactions across multiple categories, and analyze financial patterns through a hybrid client-server analytics architecture.
+A local-first personal finance Progressive Web App (PWA) with 3-tier freemium model. Features transaction splitting, real-time analytics, and works seamlessly across all devices - web and mobile - with a single codebase.
 
 ## Quick Start
 
@@ -23,7 +23,7 @@ npm run install:all
 2. Set up environment variables:
 ```bash
 # Copy example environment files
-cp packages/frontend/.env.example packages/frontend/.env.local
+cp packages/website/.env.example packages/website/.env.local
 cp packages/backend/.env.example packages/backend/.env
 ```
 
@@ -40,14 +40,14 @@ npm run dev
 ```
 
 This will start:
-- Frontend (Next.js) on http://localhost:3000
+- PWA (Next.js) on http://localhost:3000
 - Backend API simulation
 
 ### Available Scripts
 
 #### Development
 - `npm run dev` - Start all development servers
-- `npm run dev:frontend` - Start frontend only
+- `npm run dev:website` - Start PWA only
 - `npm run dev:backend` - Start backend only
 
 #### Building
@@ -72,10 +72,12 @@ This will start:
 ```
 MoneyQuestV3/
 ├── packages/
-│   ├── frontend/          # Next.js application
+│   ├── website/           # Next.js PWA (universal - web + mobile)
 │   ├── backend/           # Lambda functions
 │   ├── shared/            # Shared TypeScript types
 │   └── infrastructure/    # AWS CDK stacks
+├── archived/
+│   └── mobile/            # Archived React Native (replaced by PWA)
 ├── docs/                  # Documentation
 ├── scripts/               # Build and deployment scripts
 └── package.json           # Monorepo configuration
@@ -83,7 +85,7 @@ MoneyQuestV3/
 
 ## Tech Stack
 
-- **Frontend**: Next.js 14, TypeScript, Tailwind CSS, Zustand, React Query
+- **PWA**: Next.js 14, TypeScript, Tailwind CSS, Zustand (universal web + mobile)
 - **Backend**: AWS Lambda, TypeScript, Prisma ORM
 - **Database**: PostgreSQL (Aurora Serverless v2)
 - **Infrastructure**: AWS CDK v2
@@ -109,10 +111,14 @@ MoneyQuestV3/
 
 Create the following environment files:
 
-**packages/frontend/.env.local:**
+**packages/website/.env.local:**
 ```
 NEXT_PUBLIC_API_URL=http://localhost:3001
 NEXT_PUBLIC_AWS_REGION=us-east-1
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your-secret-key
+STRIPE_PUBLISHABLE_KEY=pk_test_your_key_here
+STRIPE_SECRET_KEY=sk_test_your_key_here
 ```
 
 **packages/backend/.env:**

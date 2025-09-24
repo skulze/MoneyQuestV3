@@ -6,7 +6,11 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent, StatCard, Modal, Input, CurrencyInput } from '@/components/ui';
 import { useDataEngine } from '@/hooks/useDataEngine';
+import { useSubscription } from '@/hooks/useSubscription';
 import { formatCurrency } from '@/lib/utils';
+import { LocalDataEngine } from '@moneyquest/shared/src/data-engine/LocalDataEngine';
+import { SubscriptionDashboard } from '@/components/subscription/SubscriptionDashboard';
+import { FeaturePrompt, UsageLimitGate } from '@/components/subscription/FeatureGate';
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
@@ -35,6 +39,19 @@ export default function DashboardPage() {
     hasUnsavedChanges
   } = useDataEngine();
 
+  const { subscription: subscriptionData } = useSubscription();
+
+  // Investment tracking state
+  const [investmentEngine] = useState(() => new LocalDataEngine());
+  const [portfolios, setPortfolios] = useState<any[]>([]);
+  const [investmentStats, setInvestmentStats] = useState({
+    totalPortfolioValue: 0,
+    totalCostBasis: 0,
+    totalGainLoss: 0,
+    portfolioCount: 0,
+    totalHoldings: 0
+  });
+
   const [showAddTransaction, setShowAddTransaction] = useState(false);
   const [showAddBudget, setShowAddBudget] = useState(false);
   const [transactionForm, setTransactionForm] = useState({
@@ -48,6 +65,51 @@ export default function DashboardPage() {
     amount: 0,
     period: 'monthly'
   });
+
+  // Load investment data
+  useEffect(() => {
+    const loadInvestmentData = async () => {
+      if (!session?.user?.email) return;
+
+      try {
+        const userId = session.user.email;
+        const portfolioData = await investmentEngine.getAllPortfoliosWithInvestments(userId);
+        setPortfolios(portfolioData);
+
+        // Calculate investment stats
+        const enrichedPortfolios = portfolioData.map(portfolio => {
+          if (!portfolio.investments || portfolio.investments.length === 0) {
+            return { ...portfolio, totalValue: 0, totalCost: 0, gainLoss: 0 };
+          }
+
+          const totalValue = portfolio.investments.reduce((sum: number, inv: any) =>
+            sum + (inv.quantity * inv.currentPrice), 0);
+          const totalCost = portfolio.investments.reduce((sum: number, inv: any) =>
+            sum + (inv.quantity * inv.costBasis), 0);
+          const gainLoss = totalValue - totalCost;
+
+          return { ...portfolio, totalValue, totalCost, gainLoss };
+        });
+
+        const totalPortfolioValue = enrichedPortfolios.reduce((sum, p) => sum + (p.totalValue || 0), 0);
+        const totalCostBasis = enrichedPortfolios.reduce((sum, p) => sum + (p.totalCost || 0), 0);
+        const totalGainLoss = totalPortfolioValue - totalCostBasis;
+        const totalHoldings = enrichedPortfolios.reduce((sum, p) => sum + (p.investments?.length || 0), 0);
+
+        setInvestmentStats({
+          totalPortfolioValue,
+          totalCostBasis,
+          totalGainLoss,
+          portfolioCount: portfolioData.length,
+          totalHoldings
+        });
+      } catch (error) {
+        console.error('Failed to load investment data:', error);
+      }
+    };
+
+    loadInvestmentData();
+  }, [session, investmentEngine]);
 
   const handleSignOut = async () => {
     try {
@@ -213,10 +275,40 @@ export default function DashboardPage() {
                 Budgets
               </Link>
               <Link
+                href="/investments"
+                className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium"
+              >
+                Investments
+              </Link>
+              <Link
                 href="/analytics"
                 className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium"
               >
                 Analytics
+              </Link>
+              <Link
+                href="/collaboration"
+                className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium"
+              >
+                Collaboration
+              </Link>
+              <Link
+                href="/receipts"
+                className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium"
+              >
+                Receipts
+              </Link>
+              <Link
+                href="/sync"
+                className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium"
+              >
+                Sync
+              </Link>
+              <Link
+                href="/pricing"
+                className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium"
+              >
+                Billing
               </Link>
             </nav>
 
@@ -291,49 +383,105 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Dashboard Stats - Now with Real Data */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <StatCard
-            title="Total Balance"
-            value={formatCurrency(stats.totalBalance)}
-            subtitle={`Across ${stats.accounts.length} account${stats.accounts.length !== 1 ? 's' : ''}`}
-            trend={stats.totalBalance > 0 ? { value: 100, isPositive: true } : undefined}
-            icon={
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-              </svg>
-            }
-          />
-          <StatCard
-            title="Transactions"
-            value={stats.transactionCount.toString()}
-            subtitle="Total recorded"
-            icon={
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-            }
-          />
-          <StatCard
-            title="Categories"
-            value={stats.categoryCount.toString()}
-            subtitle="Available"
-            icon={
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
-            }
-          />
-          <StatCard
-            title="Budgets"
-            value={stats.budgetCount.toString()}
-            subtitle="Active budgets"
-            icon={
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 00-2-2m0 0V5a2 2 0 012-2h2a2 2 0 00-2-2m0 0V5a2 2 0 012-2h2a2 2 0 002 2v10" />
-              </svg>
-            }
-          />
+        {/* Enhanced Dashboard Stats - Now with Net Worth */}
+        <div className="space-y-6 mb-8">
+          {/* Net Worth Overview */}
+          <Card className="bg-gradient-to-r from-blue-50 to-indigo-100">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Net Worth</h3>
+                  <div className="text-3xl font-bold text-blue-600">
+                    {formatCurrency(stats.totalBalance + investmentStats.totalPortfolioValue)}
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Total assets across accounts and investments
+                  </p>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm text-gray-600 mb-1">Investment Gain/Loss</div>
+                  <div className={`text-lg font-semibold ${investmentStats.totalGainLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {investmentStats.totalGainLoss >= 0 ? '+' : ''}{formatCurrency(investmentStats.totalGainLoss)}
+                  </div>
+                  <div className={`text-xs ${investmentStats.totalGainLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {investmentStats.totalCostBasis > 0
+                      ? `${investmentStats.totalGainLoss >= 0 ? '+' : ''}${((investmentStats.totalGainLoss / investmentStats.totalCostBasis) * 100).toFixed(2)}%`
+                      : 'No investments yet'
+                    }
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Detailed Stats Grid */}
+          <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
+            <StatCard
+              title="Cash & Bank"
+              value={formatCurrency(stats.totalBalance)}
+              subtitle={`${stats.accounts.length} accounts`}
+              trend={stats.totalBalance > 0 ? { value: 100, isPositive: true } : undefined}
+              icon={
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                </svg>
+              }
+            />
+            <StatCard
+              title="Investments"
+              value={formatCurrency(investmentStats.totalPortfolioValue)}
+              subtitle={`${investmentStats.portfolioCount} portfolios`}
+              trend={investmentStats.totalGainLoss !== 0 ? {
+                value: Math.abs((investmentStats.totalGainLoss / investmentStats.totalCostBasis) * 100),
+                isPositive: investmentStats.totalGainLoss >= 0
+              } : undefined}
+              icon={
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+              }
+            />
+            <StatCard
+              title="Holdings"
+              value={investmentStats.totalHoldings.toString()}
+              subtitle="Individual stocks/funds"
+              icon={
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 00-2-2m0 0V5a2 2 0 012-2h2a2 2 0 00-2-2m0 0V5a2 2 0 012-2h2a2 2 0 002 2v10" />
+                </svg>
+              }
+            />
+            <StatCard
+              title="Transactions"
+              value={stats.transactionCount.toString()}
+              subtitle="Total recorded"
+              icon={
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+              }
+            />
+            <StatCard
+              title="Categories"
+              value={stats.categoryCount.toString()}
+              subtitle="Available"
+              icon={
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+              }
+            />
+            <StatCard
+              title="Budgets"
+              value={stats.budgetCount.toString()}
+              subtitle="Active budgets"
+              icon={
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                </svg>
+              }
+            />
+          </div>
         </div>
 
         {/* Feature Cards */}
@@ -481,6 +629,11 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         )}
+
+        {/* Subscription Dashboard */}
+        <div className="mt-6">
+          <SubscriptionDashboard />
+        </div>
       </main>
 
       {/* Add Transaction Modal */}

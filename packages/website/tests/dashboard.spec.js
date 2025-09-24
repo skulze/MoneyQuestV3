@@ -55,7 +55,7 @@ test.describe('Dashboard Login and Functionality', () => {
     }
 
     // Check for dashboard content
-    await expect(page.locator('h1, h2')).toContainText(['Dashboard', 'Welcome', 'Overview'], { timeout: 5000 });
+    await expect(page.locator('h1, h2')).toContainText(['MoneyQuestV3', 'Welcome back!'], { timeout: 5000 });
     console.log('📊 Dashboard header found');
 
     // Look for stat cards or financial data

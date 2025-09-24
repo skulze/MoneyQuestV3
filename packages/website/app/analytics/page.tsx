@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useDataEngine } from '@/hooks/useDataEngine';
 import { Card, CardContent, CardHeader, CardTitle, Button } from '@/components/ui';
 import { formatCurrency } from '@/lib/utils';
+import { generatePDFReport, generateExcelReport, generateCSVExport, prepareExportData, ExportData } from '@/lib/exports';
 import {
   LineChart,
   Line,
@@ -22,7 +23,7 @@ import {
   Legend,
   ResponsiveContainer
 } from 'recharts';
-import { Calendar, TrendingUp, TrendingDown, DollarSign, Target, PieChart as PieChartIcon } from 'lucide-react';
+import { Calendar, TrendingUp, TrendingDown, DollarSign, Target, PieChart as PieChartIcon, Download, FileSpreadsheet, FileText } from 'lucide-react';
 
 interface SpendingTrendData {
   date: string;
@@ -261,6 +262,54 @@ export default function AnalyticsPage() {
     </Button>
   );
 
+  const handleExportPDF = () => {
+    if (!session?.user) return;
+
+    const exportData = prepareExportData(
+      insights,
+      spendingTrends,
+      categoryBreakdown,
+      budgetComparison,
+      timeframe,
+      session.user.name || undefined,
+      session.user.email || undefined
+    );
+
+    generatePDFReport(exportData);
+  };
+
+  const handleExportExcel = () => {
+    if (!session?.user) return;
+
+    const exportData = prepareExportData(
+      insights,
+      spendingTrends,
+      categoryBreakdown,
+      budgetComparison,
+      timeframe,
+      session.user.name || undefined,
+      session.user.email || undefined
+    );
+
+    generateExcelReport(exportData);
+  };
+
+  const handleExportCSV = () => {
+    if (!session?.user) return;
+
+    const exportData = prepareExportData(
+      insights,
+      spendingTrends,
+      categoryBreakdown,
+      budgetComparison,
+      timeframe,
+      session.user.name || undefined,
+      session.user.email || undefined
+    );
+
+    generateCSVExport(exportData);
+  };
+
   if (!session) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -283,12 +332,48 @@ export default function AnalyticsPage() {
             </p>
           </div>
 
-          {/* Timeframe selector */}
-          <div className="flex gap-2">
-            <TimeframeButton value="7d" label="7 Days" />
-            <TimeframeButton value="30d" label="30 Days" />
-            <TimeframeButton value="90d" label="90 Days" />
-            <TimeframeButton value="1y" label="1 Year" />
+          <div className="flex items-center gap-4">
+            {/* Export buttons */}
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportPDF}
+                disabled={isLoading}
+                className="flex items-center gap-2"
+              >
+                <FileText className="h-4 w-4" />
+                PDF
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportExcel}
+                disabled={isLoading}
+                className="flex items-center gap-2"
+              >
+                <FileSpreadsheet className="h-4 w-4" />
+                Excel
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportCSV}
+                disabled={isLoading}
+                className="flex items-center gap-2"
+              >
+                <Download className="h-4 w-4" />
+                CSV
+              </Button>
+            </div>
+
+            {/* Timeframe selector */}
+            <div className="flex gap-2">
+              <TimeframeButton value="7d" label="7 Days" />
+              <TimeframeButton value="30d" label="30 Days" />
+              <TimeframeButton value="90d" label="90 Days" />
+              <TimeframeButton value="1y" label="1 Year" />
+            </div>
           </div>
         </div>
       </div>

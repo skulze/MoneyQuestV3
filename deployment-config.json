@@ -1,0 +1,198 @@
+{
+  "environments": {
+    "staging": {
+      "region": "us-east-1",
+      "domain": "staging.moneyquest.app",
+      "stackName": "MoneyQuestStack-staging",
+      "apiUrl": "https://api-staging.moneyquest.app",
+      "s3Bucket": "moneyquest-staging-frontend",
+      "cloudFrontDistribution": "E1234567890ABC",
+      "rdsEndpoint": "moneyquest-staging.cluster-abc123.us-east-1.rds.amazonaws.com",
+      "cognitoUserPoolId": "us-east-1_STAGING123",
+      "cognitoClientId": "staging-client-id-123",
+      "stripePublicKey": "pk_test_staging_key",
+      "resources": {
+        "lambda": {
+          "memorySize": 512,
+          "timeout": 30,
+          "reservedConcurrency": 10
+        },
+        "rds": {
+          "instanceClass": "db.t3.small",
+          "minCapacity": 0.5,
+          "maxCapacity": 2
+        }
+      }
+    },
+    "production": {
+      "region": "us-east-1",
+      "domain": "moneyquest.app",
+      "stackName": "MoneyQuestStack-prod",
+      "apiUrl": "https://api.moneyquest.app",
+      "s3Bucket": "moneyquest-prod-frontend",
+      "cloudFrontDistribution": "E0987654321XYZ",
+      "rdsEndpoint": "moneyquest-prod.cluster-xyz789.us-east-1.rds.amazonaws.com",
+      "cognitoUserPoolId": "us-east-1_PROD456",
+      "cognitoClientId": "prod-client-id-456",
+      "stripePublicKey": "pk_live_production_key",
+      "resources": {
+        "lambda": {
+          "memorySize": 1024,
+          "timeout": 30,
+          "reservedConcurrency": 100
+        },
+        "rds": {
+          "instanceClass": "db.r5.large",
+          "minCapacity": 2,
+          "maxCapacity": 16
+        }
+      }
+    }
+  },
+  "healthCheck": {
+    "maxRetries": 10,
+    "retryDelay": 5000,
+    "endpoints": [
+      "/health",
+      "/api/health",
+      "/api/auth/health"
+    ],
+    "expectedStatus": 200,
+    "timeout": 10000
+  },
+  "rollback": {
+    "enabled": true,
+    "backupCount": 5,
+    "autoRollbackOnFailure": true,
+    "rollbackTimeoutMinutes": 15
+  },
+  "monitoring": {
+    "cloudWatch": {
+      "enabled": true,
+      "logRetentionDays": 30,
+      "alarms": {
+        "errorRate": {
+          "threshold": 1,
+          "period": 300,
+          "evaluationPeriods": 2
+        },
+        "latency": {
+          "threshold": 3000,
+          "period": 300,
+          "evaluationPeriods": 2
+        },
+        "database": {
+          "cpuThreshold": 80,
+          "connectionsThreshold": 80
+        }
+      }
+    },
+    "notifications": {
+      "slack": {
+        "enabled": true,
+        "channels": {
+          "deployments": "#deployments",
+          "alerts": "#alerts",
+          "monitoring": "#monitoring"
+        }
+      },
+      "email": {
+        "enabled": true,
+        "recipients": [
+          "dev-team@moneyquest.app",
+          "ops-team@moneyquest.app"
+        ]
+      }
+    }
+  },
+  "security": {
+    "waf": {
+      "enabled": true,
+      "rules": [
+        "AWSManagedRulesCommonRuleSet",
+        "AWSManagedRulesKnownBadInputsRuleSet",
+        "AWSManagedRulesSQLiRuleSet"
+      ]
+    },
+    "ssl": {
+      "enforceHttps": true,
+      "minimumTlsVersion": "1.2",
+      "certificateArn": "arn:aws:acm:us-east-1:123456789012:certificate/example"
+    },
+    "secrets": {
+      "rotation": {
+        "enabled": true,
+        "intervalDays": 90
+      }
+    }
+  },
+  "performance": {
+    "cloudFront": {
+      "enabled": true,
+      "caching": {
+        "defaultTtl": 86400,
+        "maxTtl": 31536000,
+        "staticAssetsTtl": 31536000
+      },
+      "compression": true,
+      "http2": true
+    },
+    "database": {
+      "connectionPooling": true,
+      "readReplicas": {
+        "production": 2,
+        "staging": 0
+      }
+    }
+  },
+  "backup": {
+    "enabled": true,
+    "schedule": "0 2 * * *",
+    "retention": {
+      "daily": 7,
+      "weekly": 4,
+      "monthly": 12
+    },
+    "crossRegionReplication": {
+      "enabled": true,
+      "destinationRegion": "us-west-2"
+    }
+  },
+  "scaling": {
+    "autoScaling": {
+      "enabled": true,
+      "targetUtilization": 70,
+      "minInstances": {
+        "production": 2,
+        "staging": 1
+      },
+      "maxInstances": {
+        "production": 20,
+        "staging": 5
+      }
+    },
+    "lambda": {
+      "concurrency": {
+        "production": 1000,
+        "staging": 100
+      }
+    }
+  },
+  "compliance": {
+    "gdpr": {
+      "enabled": true,
+      "dataRetentionDays": 2555,
+      "rightToBeForgotten": true
+    },
+    "soc2": {
+      "enabled": true,
+      "auditLogging": true,
+      "accessControl": true
+    },
+    "encryption": {
+      "atRest": true,
+      "inTransit": true,
+      "keyRotation": true
+    }
+  }
+}
