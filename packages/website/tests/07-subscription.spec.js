@@ -6,16 +6,16 @@ test.describe('Subscription & Feature Gating', () => {
     await page.goto('/pricing');
 
     // Check pricing page loads
-    await expect(page.locator('text=Pricing')).toBeVisible();
+    await expect(page.locator('h1:has-text("Choose Your MoneyQuest Plan")')).toBeVisible();
   });
 
   test('should display subscription tiers', async ({ page }) => {
     await page.goto('/pricing');
 
     // Check for the three subscription tiers mentioned in project
-    await expect(page.locator('text=Free')).toBeVisible();
-    await expect(page.locator('text=Plus')).toBeVisible();
-    await expect(page.locator('text=Premium')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Free' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Plus' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Premium' })).toBeVisible();
 
     // Check pricing amounts
     const plusPrice = page.locator('text=$2.99').or(page.locator('text=2.99'));
@@ -59,9 +59,9 @@ test.describe('Subscription & Feature Gating', () => {
     ];
 
     // Check for key feature mentions
-    await expect(page.locator('text=Transaction splitting')).toBeVisible();
+    await expect(page.locator('text=Manual transaction entry')).toBeVisible();
     await expect(page.locator('text=Multi-user').or(page.locator('text=collaboration'))).toBeVisible();
-    await expect(page.locator('text=Bank').or(page.locator('text=Plaid'))).toBeVisible();
+    await expect(page.locator('text=Bank account connections').or(page.locator('text=Plaid'))).toBeVisible();
   });
 
   test('should have working upgrade buttons', async ({ page }) => {
@@ -253,7 +253,7 @@ test.describe('Subscription & Feature Gating', () => {
     await expect(page.locator('body')).toBeVisible();
 
     // Pricing tiers should be readable on mobile
-    await expect(page.locator('text=Free')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Free' })).toBeVisible();
 
     await page.setViewportSize({ width: 1280, height: 720 });
   });

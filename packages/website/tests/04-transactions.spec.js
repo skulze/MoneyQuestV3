@@ -11,12 +11,20 @@ test.describe('Transaction Management', () => {
   });
 
   test('should load transactions page structure', async ({ page }) => {
+    // Wait for any client-side redirects to complete
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000); // Give time for useAuthGuard to execute
+
+
+    // Since we're not authenticated, we should be on signin page
     if (page.url().includes('signin')) {
-      test.skip('Skipping authenticated transactions test - no auth setup');
+      await expect(page.locator('h1:has-text("Sign In")')).toBeVisible();
+      test.skip('Redirected to signin as expected - no authenticated transactions test');
+      return;
     }
 
-    // Check for transactions page elements
-    await expect(page.locator('text=Transactions')).toBeVisible();
+    // If somehow not redirected, check for transactions page elements
+    await expect(page.locator('h1:has-text("Transactions")')).toBeVisible();
   });
 
   test('should display transaction list', async ({ page }) => {

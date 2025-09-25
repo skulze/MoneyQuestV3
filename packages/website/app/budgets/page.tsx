@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
 import { useDataEngine } from '@/hooks/useDataEngine';
+import { useAuthGuard } from '@/hooks/useAuthGuard';
 import { Button, Card, CardContent, CardHeader, CardTitle, Modal, Input, CurrencyInput } from '@/components/ui';
 import { formatCurrency } from '@/lib/utils';
 import { Plus, Edit, Trash2, Target, TrendingUp, AlertCircle } from 'lucide-react';
@@ -24,7 +24,7 @@ interface Budget {
 }
 
 export default function BudgetsPage() {
-  const { data: session } = useSession();
+  const { session, isLoading: authLoading } = useAuthGuard('/budgets');
   const { dataEngine, stats, refreshStats, addBudget, subscriptionTier } = useDataEngine();
 
   const [budgets, setBudgets] = useState<Budget[]>([]);
@@ -185,11 +185,12 @@ export default function BudgetsPage() {
     }
   };
 
-  if (!session) {
+  // Show loading spinner while auth is being checked
+  if (authLoading || !session) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center">
-          <p className="text-gray-600">Please sign in to view your budgets.</p>
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
         </div>
       </div>
     );

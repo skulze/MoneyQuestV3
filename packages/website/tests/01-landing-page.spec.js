@@ -15,9 +15,9 @@ test.describe('Landing Page & UI Components', () => {
     await expect(page.locator('p').first()).toContainText('Local-first personal finance with transaction splitting and real-time analytics');
 
     // Check technology stack section
-    await expect(page.locator('text=Next.js 14')).toBeVisible();
-    await expect(page.locator('text=TypeScript')).toBeVisible();
-    await expect(page.locator('text=Local-First')).toBeVisible();
+    await expect(page.locator('text=Next.js 14').first()).toBeVisible();
+    await expect(page.locator('text=TypeScript').first()).toBeVisible();
+    await expect(page.locator('text=Local-First').first()).toBeVisible();
   });
 
   test('should display UI component demonstrations', async ({ page }) => {
@@ -71,7 +71,7 @@ test.describe('Landing Page & UI Components', () => {
     await expect(page.locator('text=Budget Progress')).toBeVisible();
     await expect(page.locator('text=73%')).toBeVisible();
 
-    await expect(page.locator('text=Transactions')).toBeVisible();
+    await expect(page.locator('h6:has-text("Transactions")')).toBeVisible();
     await expect(page.locator('text=127')).toBeVisible();
   });
 
@@ -79,10 +79,10 @@ test.describe('Landing Page & UI Components', () => {
     await page.goto('/');
 
     // Check feature cards
-    await expect(page.locator('text=Transaction Splitting')).toBeVisible();
-    await expect(page.locator('text=Real-Time Analytics')).toBeVisible();
-    await expect(page.locator('text=Budget Management')).toBeVisible();
-    await expect(page.locator('text=GDPR Compliant')).toBeVisible();
+    await expect(page.locator('h4:has-text("Transaction Splitting")')).toBeVisible();
+    await expect(page.locator('h4:has-text("Real-Time Analytics")')).toBeVisible();
+    await expect(page.locator('h4:has-text("Budget Management")')).toBeVisible();
+    await expect(page.locator('h4:has-text("GDPR Compliant")')).toBeVisible();
 
     // Check feature descriptions
     await expect(page.locator('text=Split any transaction across multiple spending categories')).toBeVisible();
@@ -139,7 +139,7 @@ test.describe('Landing Page & UI Components', () => {
 
     // Check main content is visible on mobile
     await expect(page.locator('h1')).toBeVisible();
-    await expect(page.locator('text=MoneyQuestV3')).toBeVisible();
+    await expect(page.locator('h1:has-text("MoneyQuestV3")')).toBeVisible();
 
     // Check buttons stack vertically on mobile
     const buttonContainer = page.locator('.flex.flex-col.sm\\:flex-row');

@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
 import { useDataEngine } from '@/hooks/useDataEngine';
+import { useAuthGuard } from '@/hooks/useAuthGuard';
 import { Card, CardContent, CardHeader, CardTitle, Button } from '@/components/ui';
 import { formatCurrency } from '@/lib/utils';
 import { generatePDFReport, generateExcelReport, generateCSVExport, prepareExportData, ExportData } from '@/lib/exports';
@@ -56,7 +56,7 @@ interface NetWorthData {
 }
 
 export default function AnalyticsPage() {
-  const { data: session } = useSession();
+  const { session, isLoading: authLoading } = useAuthGuard('/analytics');
   const { dataEngine, stats, getCategorySpending, getBudgetProgress, subscriptionTier } = useDataEngine();
 
   const [timeframe, setTimeframe] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
@@ -310,11 +310,12 @@ export default function AnalyticsPage() {
     generateCSVExport(exportData);
   };
 
-  if (!session) {
+  // Show loading spinner while auth is being checked
+  if (authLoading || !session) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center">
-          <p className="text-gray-600">Please sign in to view your analytics.</p>
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
         </div>
       </div>
     );

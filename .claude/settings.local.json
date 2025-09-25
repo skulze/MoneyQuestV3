@@ -119,7 +119,12 @@
       "Bash(source .dev-aliases)",
       "Bash(./scripts/process-manager.sh status:*)",
       "Bash(devstatus)",
-      "Bash(./scripts/process-manager.sh kill:*)"
+      "Bash(./scripts/process-manager.sh kill:*)",
+      "Bash(timeout 30s npx playwright test tests/subscription.spec.js --reporter=line)",
+      "Bash(timeout 30s npx playwright test tests/07-subscription.spec.js --reporter=line)",
+      "Bash(PLAYWRIGHT_BASE_URL=http://localhost:3000 timeout 30s npx playwright test tests/07-subscription.spec.js --reporter=line)",
+      "Bash(PLAYWRIGHT_BASE_URL=http://localhost:3000 timeout 60s npx playwright test tests/07-subscription.spec.js --reporter=line --workers=32)",
+      "mcp__playwright__browser_navigate"
     ],
     "deny": [
       "KillShell"

@@ -49,13 +49,6 @@ export default function RootLayout({
         <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-192x192.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-192x192.png" />
         <link rel="shortcut icon" href="/favicon.ico" />
-        <meta name="theme-color" content="#3b82f6" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-mobile-web-app-title" content="MoneyQuest" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="application-name" content="MoneyQuest" />
-        <meta name="msapplication-TileColor" content="#3b82f6" />
         <meta name="msapplication-tap-highlight" content="no" />
         <meta name="format-detection" content="telephone=no" />
       </head>
