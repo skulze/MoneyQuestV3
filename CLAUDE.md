@@ -108,13 +108,19 @@ npm install
 # Set up database
 npm run db:setup && npm run db:migrate && npm run db:seed
 
-# Start development servers
-npm run dev:website    # PWA development server on port 3000
-npm run dev:backend    # Local Lambda simulation
+# Start development servers (foreground mode - recommended)
+npm run dev            # Starts both website + backend with live output
+                       # Website: http://localhost:3000 (Next.js 15.5.4)
+                       # Backend: http://localhost:8080 (tsx watch mode)
+                       # Use Ctrl+C to stop both servers cleanly
 ```
 
-### Development Constraints
-**IMPORTANT: Only run ONE virtual environment at a time to prevent port conflicts and resource issues.**
+### Development Best Practices
+**RECOMMENDED: Run servers in foreground mode for optimal process management:**
+- **Clean shutdown**: `Ctrl+C` stops all processes gracefully
+- **Live feedback**: See real-time output from both servers
+- **No orphaned processes**: Proper parent-child process relationships
+- **Resource efficiency**: Single controlled session
 
 ### Key Commands
 ```bash
@@ -304,49 +310,69 @@ npm run security-audit # Vulnerability scanning
 ---
 **Status**: Development Phase | **Architecture**: Local-First | **Target**: 10k users, $12k+ monthly profit
 
-# Important Development Constraints
-**CRITICAL: Only run ONE virtual environment/development server at a time.**
-- Never run multiple `npm run dev` processes simultaneously
-- Always stop existing development servers before starting new ones
-- **Git Bash Environment**: Use `Ctrl+C` or `taskkill //F //IM node.exe` to stop servers
-- This prevents port conflicts, resource exhaustion, and debugging confusion
+# Development Environment & Process Management
+
+## Hot Reload Development (Recommended)
+**KEEP SERVERS RUNNING for optimal development workflow:**
+- **Hot reload**: Code changes automatically refresh the browser
+- **Live updates**: Edit files and see changes instantly without restart
+- **API testing**: Backend stays available at http://localhost:8080
+- **Continuous development**: Modern stack optimized for live coding
+
+**Current development servers support:**
+- **Website**: Next.js 15 with hot reload (http://localhost:3000)
+- **Backend**: tsx watch mode with auto-restart (http://localhost:8080)
+
+## When to Restart Development Servers
+
+### ✅ Keep Running (No Restart Needed)
+- Code changes in components, pages, API routes
+- CSS/styling updates
+- Adding new files
+- Most configuration changes
+
+### 🔄 Restart Required
+- Installing new dependencies (`npm install`)
+- Environment variable changes (.env files)
+- Next.js config changes (next.config.js)
+- TypeScript config changes (tsconfig.json)
+- Package.json script changes
 
 ## Development Environment
 **Primary Development Platform: Windows 10/11 with Git Bash**
 - **ALWAYS use Git Bash commands**: `rm -rf`, `ps aux`, `find`, `grep` (Unix-style file operations)
-- **Process management**: Use Windows commands that work in Git Bash: `taskkill //F //IM node.exe`
+- **Process management**: Use Windows commands that work in Git Bash when needed
 - **File operations**: Use `rm -rf .next` instead of `rmdir /s /q .next`
 - **Node/npm commands work identically**: `npm run dev`, `npx playwright test`
 
-## Process Management Best Practices
+## Process Management (When Restart is Needed)
 
-### Killing Development Servers (Preventing Orphaned Processes)
-**Best approach (in order of preference):**
+### Graceful Server Management
+**Preferred approach (in order):**
 
 1. **Graceful shutdown first** - `Ctrl+C` in the terminal where the server is running
-2. **If that fails, use taskkill** - `taskkill //F //IM node.exe`
+2. **If servers become unresponsive** - `taskkill //F //IM node.exe`
 3. **Check for remaining processes** - `tasklist | findstr node` to verify cleanup
 
-**Complete cleanup sequence:**
+**Clean restart sequence (only when needed):**
 ```bash
-# 1. Try graceful shutdown first (Ctrl+C)
-# 2. If that fails, kill Node processes
+# 1. Try graceful shutdown first (Ctrl+C in the foreground terminal)
+# 2. If that fails, force kill processes
 taskkill //F //IM node.exe
 
 # 3. Verify all Node processes are gone
 tasklist | findstr node
 
-# 4. Clean up any remaining development artifacts
+# 4. Clean up any cached artifacts if needed
 rm -rf packages/website/.next/cache
+
+# 5. Restart development servers in foreground
+npm run dev
 ```
 
-**Why this prevents orphaned processes:**
-- `Ctrl+C` sends graceful shutdown signal first
-- `taskkill //F` forcefully terminates all node.exe processes when needed
-- Cleaning cache removes file locks from terminated processes
-- Works reliably in Git Bash on Windows
-
 **Process management commands that work in Git Bash:**
-- `taskkill //F //IM node.exe` - Force kill all Node processes (use double slashes in Git Bash)
 - `tasklist | findstr node` - List running Node processes
+- `taskkill //F //IM node.exe` - Force kill all Node processes (use double slashes in Git Bash)
 - `Ctrl+C` - Graceful shutdown (always try first)
+
+**Note**: Normal development should have ~10 Node processes running (1 concurrently + 2 npm + 1 tsx + ~6 Next.js processes). This is expected and efficient.

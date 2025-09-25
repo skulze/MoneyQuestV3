@@ -51,9 +51,9 @@
   "author": "MoneyQuestV3 Team",
   "license": "UNLICENSED",
   "devDependencies": {
-    "concurrently": "^8.2.0",
-    "typescript": "^5.0.0",
-    "@types/node": "^20.0.0"
+    "@types/node": "^20.0.0",
+    "concurrently": "^9.2.1",
+    "typescript": "^5.0.0"
   },
   "engines": {
     "node": ">=18.0.0",

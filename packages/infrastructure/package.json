@@ -14,7 +14,7 @@
     "bootstrap": "cdk bootstrap"
   },
   "dependencies": {
-    "aws-cdk-lib": "2.100.0",
+    "aws-cdk-lib": "^2.216.0",
     "constructs": "^10.0.0",
     "moneyquest-v3": "file:../.."
   },

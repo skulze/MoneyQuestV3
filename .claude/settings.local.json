@@ -108,7 +108,12 @@
       "Bash(timeout 30s npx playwright test tests/analytics.spec.js --reporter=line)",
       "Bash(timeout 30s npx playwright test tests/login-features.spec.js --reporter=line)",
       "Bash(timeout 15s npx playwright test tests/login-features.spec.js:46 --reporter=line)",
-      "Bash(timeout 15s npx playwright test tests/analytics.spec.js:17 --reporter=line)"
+      "Bash(timeout 15s npx playwright test tests/analytics.spec.js:17 --reporter=line)",
+      "Bash(npm outdated)",
+      "Bash(npm update)",
+      "Bash(npm audit fix:*)",
+      "Bash(NODE_OPTIONS=\"--trace-deprecation\" npm run dev)",
+      "Bash(npm view:*)"
     ],
     "deny": [
       "KillShell"
