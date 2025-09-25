@@ -1,0 +1,33 @@
+# MoneyQuestV3 Development Aliases
+# Source this file in your shell: source .dev-aliases
+
+# Process management shortcuts
+alias devstatus='./scripts/process-manager.sh status'
+alias killdev='./scripts/process-manager.sh kill'
+alias killport='./scripts/process-manager.sh kill-port'
+
+# Quick development commands
+alias dev='npm run dev'
+alias test='npm run test'
+alias build='npm run build'
+alias lint='npm run lint'
+alias typecheck='npm run typecheck'
+
+# Git shortcuts for this project
+alias gs='git status'
+alias gd='git diff'
+alias ga='git add'
+alias gc='git commit'
+
+# Process monitoring
+alias psnode='tasklist | findstr node'
+alias ports='netstat -ano | findstr -E ":(3000|8080) "'
+
+echo "MoneyQuestV3 development aliases loaded! 🚀"
+echo "Available commands:"
+echo "  devstatus  - Check running dev servers"
+echo "  killdev    - Stop all dev servers cleanly"
+echo "  killport   - Kill process on specific port"
+echo "  dev        - Start development servers"
+echo "  psnode     - Show Node.js processes"
+echo "  ports      - Check ports 3000 and 8080"

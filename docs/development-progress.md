@@ -2,7 +2,7 @@
 
 ## 🎯 Project Status: **85% Complete - Subscription System Live**
 
-**🚀 Live Environment**: http://localhost:3004
+**🚀 Live Environment**: http://localhost:3000
 **💡 Architecture**: Progressive Web App (PWA-Only) - Local-first + Cloud backup
 **💰 Business Model**: 3-tier freemium (Free / Plus $2.99 / Premium $9.99)
 **📱 Mobile Strategy**: PWA universal experience (React Native archived)

@@ -113,7 +113,13 @@
       "Bash(npm update)",
       "Bash(npm audit fix:*)",
       "Bash(NODE_OPTIONS=\"--trace-deprecation\" npm run dev)",
-      "Bash(npm view:*)"
+      "Bash(npm view:*)",
+      "Bash(code:*)",
+      "Bash(chmod:*)",
+      "Bash(source .dev-aliases)",
+      "Bash(./scripts/process-manager.sh status:*)",
+      "Bash(devstatus)",
+      "Bash(./scripts/process-manager.sh kill:*)"
     ],
     "deny": [
       "KillShell"

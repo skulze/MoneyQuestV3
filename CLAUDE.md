@@ -345,34 +345,44 @@ npm run security-audit # Vulnerability scanning
 - **File operations**: Use `rm -rf .next` instead of `rmdir /s /q .next`
 - **Node/npm commands work identically**: `npm run dev`, `npx playwright test`
 
-## Process Management (When Restart is Needed)
+## Process Management
 
-### Graceful Server Management
-**Preferred approach (in order):**
+### Smart Process Management Tools
+**NEW: Automated process management setup available!**
 
-1. **Graceful shutdown first** - `Ctrl+C` in the terminal where the server is running
-2. **If servers become unresponsive** - `taskkill //F //IM node.exe`
-3. **Check for remaining processes** - `tasklist | findstr node` to verify cleanup
-
-**Clean restart sequence (only when needed):**
+**Quick Commands:**
 ```bash
-# 1. Try graceful shutdown first (Ctrl+C in the foreground terminal)
-# 2. If that fails, force kill processes
-taskkill //F //IM node.exe
+# Load development aliases (run once per terminal session)
+source .dev-aliases
 
-# 3. Verify all Node processes are gone
-tasklist | findstr node
+# Smart process manager
+./scripts/process-manager.sh status    # Check running dev servers
+./scripts/process-manager.sh kill      # Stop all dev servers cleanly
+./scripts/process-manager.sh kill-port 3000  # Kill specific port
 
-# 4. Clean up any cached artifacts if needed
-rm -rf packages/website/.next/cache
-
-# 5. Restart development servers in foreground
-npm run dev
+# Development aliases (after sourcing .dev-aliases)
+devstatus    # Check server status
+killdev      # Stop dev servers
+psnode       # Show Node processes
+ports        # Check ports 3000 and 8080
 ```
 
+### VS Code Extensions Installed
+- **Project Manager**: Better workspace management
+- **PowerShell**: Enhanced Windows process control
+- **Code Runner**: Improved terminal control
+- **Thunder Client**: API testing and management
+
+### Graceful Server Management (Fallback)
+**If automated tools aren't available:**
+
+1. **Graceful shutdown first** - `Ctrl+C` in the terminal where the server is running
+2. **Use process manager** - `./scripts/process-manager.sh kill`
+3. **Emergency fallback** - `taskkill //F //IM node.exe`
+
 **Process management commands that work in Git Bash:**
+- `./scripts/process-manager.sh status` - Smart status check with port detection
 - `tasklist | findstr node` - List running Node processes
-- `taskkill //F //IM node.exe` - Force kill all Node processes (use double slashes in Git Bash)
-- `Ctrl+C` - Graceful shutdown (always try first)
+- `taskkill //F //IM node.exe` - Force kill all Node processes (emergency only)
 
 **Note**: Normal development should have ~10 Node processes running (1 concurrently + 2 npm + 1 tsx + ~6 Next.js processes). This is expected and efficient.
