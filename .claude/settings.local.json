@@ -98,7 +98,17 @@
       "Bash(netstat:*)",
       "Bash(findstr:*)",
       "Bash(taskkill:*)",
-      "Bash(tasklist)"
+      "Bash(tasklist)",
+      "Bash(tasklist:*)",
+      "Bash(cmd.exe:*)",
+      "Bash(PLAYWRIGHT_BASE_URL=http://localhost:3000 npx playwright test --reporter=line)",
+      "Bash(PLAYWRIGHT_BASE_URL=http://localhost:3001 npx playwright test --reporter=line)",
+      "Bash(kill:*)",
+      "Bash(timeout 90s npx playwright test --reporter=line)",
+      "Bash(timeout 30s npx playwright test tests/analytics.spec.js --reporter=line)",
+      "Bash(timeout 30s npx playwright test tests/login-features.spec.js --reporter=line)",
+      "Bash(timeout 15s npx playwright test tests/login-features.spec.js:46 --reporter=line)",
+      "Bash(timeout 15s npx playwright test tests/analytics.spec.js:17 --reporter=line)"
     ],
     "deny": [],
     "ask": []

@@ -5,15 +5,22 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import { PrismaClient } from '@prisma/client';
 
-// Initialize Prisma client for NextAuth adapter (this will use the backend's database)
-// In development, we'll use a mock for local-first development
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL || 'file:./dev.db'
+// Singleton pattern for Prisma client to prevent memory leaks
+// Ensures only one database connection across all auth requests
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined;
+};
+
+const prisma = globalForPrisma.prisma ??
+  new PrismaClient({
+    datasources: {
+      db: {
+        url: process.env.DATABASE_URL || 'file:./dev.db'
+      }
     }
-  }
-});
+  });
+
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 
 const authOptions: NextAuthOptions = {
   // Use Prisma adapter for production, but we'll handle local-first separately

@@ -1,0 +1,46 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - heading "Sign In" [level=1] [ref=e5]
+      - paragraph [ref=e6]: Welcome to MoneyQuestV3 - Sign in to your personal finance dashboard
+    - generic [ref=e7]:
+      - generic [ref=e8]:
+        - heading "Demo Accounts" [level=5] [ref=e9]
+        - paragraph [ref=e10]: Try different subscription tiers
+      - generic [ref=e12]:
+        - button "Free Tier - free@moneyquest.com" [ref=e13] [cursor=pointer]:
+          - generic [ref=e14] [cursor=pointer]: Free Tier - free@moneyquest.com
+        - button "Plus Tier ($2.99) - plus@moneyquest.com" [ref=e16] [cursor=pointer]:
+          - generic [ref=e17] [cursor=pointer]: Plus Tier ($2.99) - plus@moneyquest.com
+        - button "Premium Tier ($9.99) - premium@moneyquest.com" [ref=e19] [cursor=pointer]:
+          - generic [ref=e20] [cursor=pointer]: Premium Tier ($9.99) - premium@moneyquest.com
+    - generic [ref=e22]:
+      - generic [ref=e23]:
+        - heading "Sign In" [level=3] [ref=e24]
+        - paragraph [ref=e25]: Enter your credentials or use a demo account above
+      - generic [ref=e26]:
+        - generic [ref=e27]:
+          - generic [ref=e28]:
+            - generic [ref=e29]: Email
+            - textbox "your@email.com" [ref=e31]
+          - generic [ref=e32]:
+            - generic [ref=e33]: Password
+            - textbox "Enter your password" [ref=e35]
+        - generic [ref=e36]:
+          - button "Sign In" [ref=e37] [cursor=pointer]
+          - paragraph [ref=e39]:
+            - text: Don't have an account?
+            - button "Sign up" [ref=e40] [cursor=pointer]
+    - generic [ref=e41]:
+      - heading "What you'll get:" [level=3] [ref=e42]
+      - generic [ref=e43]:
+        - generic [ref=e44]: Transaction Splitting
+        - generic [ref=e45]: Real-time Analytics
+        - generic [ref=e46]: Budget Tracking
+        - generic [ref=e47]: Local-first
+        - generic [ref=e48]: GDPR Compliant
+  - alert [ref=e49]
+```

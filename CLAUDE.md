@@ -113,6 +113,9 @@ npm run dev:website    # PWA development server on port 3000
 npm run dev:backend    # Local Lambda simulation
 ```
 
+### Development Constraints
+**IMPORTANT: Only run ONE virtual environment at a time to prevent port conflicts and resource issues.**
+
 ### Key Commands
 ```bash
 # Testing & Quality
@@ -300,3 +303,53 @@ npm run security-audit # Vulnerability scanning
 
 ---
 **Status**: Development Phase | **Architecture**: Local-First | **Target**: 10k users, $12k+ monthly profit
+
+# Important Development Constraints
+**CRITICAL: Only run ONE virtual environment/development server at a time.**
+- Never run multiple `npm run dev` processes simultaneously
+- Always stop existing development servers before starting new ones
+- **Git Bash Environment**: Use `pkill node` or `Ctrl+C` to stop servers
+- This prevents port conflicts, resource exhaustion, and debugging confusion
+
+## Development Environment
+**Primary Development Platform: Windows 10/11 with Git Bash**
+- **ALWAYS use Git Bash commands**: `rm -rf`, `pkill`, `ps aux`, `find`, `grep`
+- **Never mix Windows CMD syntax**: Avoid `taskkill`, `rmdir /s`, `findstr`
+- **Consistent Unix-style commands**: Git Bash supports all standard Unix commands on Windows
+- **Process management**: Use `pkill node` instead of `taskkill /F /IM node.exe`
+- **File operations**: Use `rm -rf .next` instead of `rmdir /s /q .next`
+- **Node/npm commands work identically**: `npm run dev`, `npx playwright test`
+
+## Process Management Best Practices
+
+### Killing Development Servers (Preventing Orphaned Processes)
+**Best approach (in order of preference):**
+
+1. **Graceful shutdown first** - `Ctrl+C` in the terminal where the server is running
+2. **If that fails, use pkill** - `pkill -f "node.*dev"` or `pkill node`
+3. **Check for remaining processes** - `ps aux | grep node` to verify cleanup
+
+**Complete cleanup sequence:**
+```bash
+# 1. Try graceful shutdown first (Ctrl+C)
+# 2. If that fails, kill specific Node processes
+pkill -f "npm run dev"
+pkill -f "next dev"
+pkill node
+
+# 3. Verify all Node processes are gone
+ps aux | grep node
+
+# 4. Clean up any remaining development artifacts
+rm -rf packages/website/.next/cache
+```
+
+**Why this prevents orphaned processes:**
+- `pkill` sends SIGTERM first (graceful)
+- It targets the entire process tree
+- Git Bash handles process cleanup better than Windows CMD
+- Removes cached build artifacts that might hold file locks
+
+**Avoid these Windows commands:**
+- `taskkill /F /IM node.exe` (too aggressive, can leave orphans)
+- `tasklist` + `tasklist` (Windows-specific, inconsistent in Git Bash)

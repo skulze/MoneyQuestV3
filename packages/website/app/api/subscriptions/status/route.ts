@@ -26,36 +26,43 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Try to get actual Stripe subscription if available
+    // Try to get actual Stripe subscription if available and properly configured
     let stripeSubscription = null;
-    try {
-      const customers = await stripe.customers.list({
-        email: userEmail,
-        limit: 1,
-      });
+    let isDemoMode = true;
 
-      if (customers.data.length > 0) {
-        const subscriptions = await stripe.subscriptions.list({
-          customer: customers.data[0].id,
-          status: 'active',
+    if (stripe && process.env.STRIPE_SECRET_KEY?.startsWith('sk_')) {
+      try {
+        const customers = await stripe.customers.list({
+          email: userEmail,
           limit: 1,
         });
 
-        if (subscriptions.data.length > 0) {
-          stripeSubscription = subscriptions.data[0];
-          const priceId = stripeSubscription.items.data[0]?.price.id;
+        if (customers.data.length > 0) {
+          const subscriptions = await stripe.subscriptions.list({
+            customer: customers.data[0].id,
+            status: 'active',
+            limit: 1,
+          });
 
-          // Update tier based on actual Stripe subscription
-          if (priceId === SUBSCRIPTION_TIERS.PLUS.priceId) {
-            subscriptionTier = 'PLUS';
-          } else if (priceId === SUBSCRIPTION_TIERS.PREMIUM.priceId) {
-            subscriptionTier = 'PREMIUM';
+          if (subscriptions.data.length > 0) {
+            stripeSubscription = subscriptions.data[0];
+            const priceId = stripeSubscription.items.data[0]?.price.id;
+
+            // Update tier based on actual Stripe subscription
+            if (priceId === SUBSCRIPTION_TIERS.PLUS.priceId) {
+              subscriptionTier = 'PLUS';
+            } else if (priceId === SUBSCRIPTION_TIERS.PREMIUM.priceId) {
+              subscriptionTier = 'PREMIUM';
+            }
+            isDemoMode = false;
           }
         }
+      } catch (stripeError) {
+        console.warn('Stripe API call failed (using demo mode):', stripeError.message);
+        // Continue with demo logic - don't let Stripe failures break the app
       }
-    } catch (stripeError) {
-      console.warn('Could not fetch Stripe subscription:', stripeError);
-      // Continue with demo logic
+    } else {
+      console.log('Using demo mode - no valid Stripe keys configured');
     }
 
     const tierConfig = SUBSCRIPTION_TIERS[subscriptionTier as keyof typeof SUBSCRIPTION_TIERS];
@@ -67,6 +74,7 @@ export async function GET(request: NextRequest) {
       features: tierConfig.features,
       limits: tierConfig.limits,
       isActive: true,
+      demoMode: isDemoMode,
       stripeSubscription: stripeSubscription ? {
         id: stripeSubscription.id,
         status: stripeSubscription.status,

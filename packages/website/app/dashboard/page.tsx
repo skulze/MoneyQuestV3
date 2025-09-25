@@ -314,7 +314,7 @@ export default function DashboardPage() {
 
             <div className="flex items-center space-x-4">
               <div className="text-right">
-                <p className="text-sm font-medium text-gray-900">Demo User</p>
+                <p className="text-sm font-medium text-gray-900">{session?.user?.name || 'User'}</p>
                 <p className={`text-xs font-medium ${tierColors[subscriptionTier as keyof typeof tierColors]}`}>
                   {tierLabels[subscriptionTier as keyof typeof tierLabels]}
                 </p>

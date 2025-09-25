@@ -28,16 +28,12 @@ test.describe('Analytics Page Testing', () => {
     await page.waitForTimeout(500);
 
     // Submit form
-    await page.evaluate(() => {
-      const form = document.querySelector('form');
-      if (form) {
-        form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-      }
-    });
+    await page.click('button[type="submit"]');
     console.log('🔐 Submitted login form');
 
-    // Wait for authentication
-    await page.waitForTimeout(2000);
+    // Wait for authentication and redirect to dashboard
+    await page.waitForURL('**/dashboard', { timeout: 10000 });
+    console.log('✅ Successfully logged in - redirected to dashboard');
 
     // Navigate to analytics page
     console.log('📊 Navigating to analytics page...');
@@ -99,13 +95,8 @@ test.describe('Analytics Page Testing', () => {
     await page.click('button:has-text("Free Tier - free@moneyquest.com")');
     await page.waitForTimeout(500);
 
-    await page.evaluate(() => {
-      const form = document.querySelector('form');
-      if (form) {
-        form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-      }
-    });
-    await page.waitForTimeout(2000);
+    await page.click('button[type="submit"]');
+    await page.waitForURL('**/dashboard', { timeout: 10000 });
 
     // Navigate to analytics
     await page.goto('http://localhost:3000/analytics');
@@ -179,13 +170,8 @@ test.describe('Analytics Page Testing', () => {
     await page.click('button:has-text("Free Tier - free@moneyquest.com")');
     await page.waitForTimeout(500);
 
-    await page.evaluate(() => {
-      const form = document.querySelector('form');
-      if (form) {
-        form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-      }
-    });
-    await page.waitForTimeout(2000);
+    await page.click('button[type="submit"]');
+    await page.waitForURL('**/dashboard', { timeout: 10000 });
 
     await page.goto('http://localhost:3000/analytics');
     await page.waitForLoadState('networkidle');
@@ -249,13 +235,8 @@ test.describe('Analytics Page Testing', () => {
     await page.click('button:has-text("Free Tier - free@moneyquest.com")');
     await page.waitForTimeout(500);
 
-    await page.evaluate(() => {
-      const form = document.querySelector('form');
-      if (form) {
-        form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-      }
-    });
-    await page.waitForTimeout(2000);
+    await page.click('button[type="submit"]');
+    await page.waitForURL('**/dashboard', { timeout: 10000 });
 
     await page.goto('http://localhost:3000/analytics');
     await page.waitForLoadState('networkidle');

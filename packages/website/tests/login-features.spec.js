@@ -50,23 +50,23 @@ test.describe('Login Features Testing', () => {
     await page.goto(`${baseURL}/auth/signin`);
     console.log('📍 Navigated to login page');
 
-    // Fill in credentials
-    await page.fill('input[type="email"], input[name="email"]', 'demo@moneyquest.com');
-    await page.fill('input[type="password"], input[name="password"]', 'demo123');
-    console.log('📝 Filled in demo credentials');
+    // Use demo account button for consistent authentication
+    await page.click('button:has-text("Free Tier - free@moneyquest.com")');
+    console.log('🔘 Clicked demo account button');
+    await page.waitForTimeout(500);
 
-    // Click login button
-    await page.click('button:has-text("Sign In"), button:has-text("Login")');
-    console.log('🔐 Clicked login button');
+    // Submit form
+    await page.click('button[type="submit"]');
+    console.log('🔐 Submitted login form');
 
-    // Wait for successful login and redirect
-    await page.waitForURL(/\/dashboard/, { timeout: 15000 });
+    // Wait for authentication and redirect to dashboard
+    await page.waitForURL('**/dashboard', { timeout: 10000 });
     expect(page.url()).toContain('/dashboard');
     console.log('✅ Successfully logged in and redirected to dashboard');
 
     // Verify dashboard content
     await expect(page.locator('text=Welcome back')).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('text=Demo User')).toBeVisible();
+    await expect(page.locator('text=Free User')).toBeVisible();
     console.log('✅ Dashboard loaded with user information');
   });
 
@@ -84,9 +84,10 @@ test.describe('Login Features Testing', () => {
     console.log('📍 Callback URL captured:', callbackUrl);
 
     // Login
-    await page.fill('input[type="email"], input[name="email"]', 'demo@moneyquest.com');
-    await page.fill('input[type="password"], input[name="password"]', 'demo123');
-    await page.click('button:has-text("Sign In"), button:has-text("Login")');
+    // Use demo button pattern for consistent authentication
+    await page.click('button:has-text("Free Tier - free@moneyquest.com")');
+    await page.waitForTimeout(500);
+    await page.click('button[type="submit"]');
 
     // Should redirect back to original page
     await page.waitForURL(/\/investments/, { timeout: 15000 });
@@ -99,10 +100,11 @@ test.describe('Login Features Testing', () => {
 
     // First login
     await page.goto(`${baseURL}/auth/signin`);
-    await page.fill('input[type="email"], input[name="email"]', 'demo@moneyquest.com');
-    await page.fill('input[type="password"], input[name="password"]', 'demo123');
-    await page.click('button:has-text("Sign In"), button:has-text("Login")');
-    await page.waitForURL(/\/dashboard/);
+    // Use demo button pattern for consistent authentication
+    await page.click('button:has-text("Free Tier - free@moneyquest.com")');
+    await page.waitForTimeout(500);
+    await page.click('button[type="submit"]');
+    await page.waitForURL('**/dashboard', { timeout: 10000 });
     console.log('🔐 Successfully logged in');
 
     // Test Collaboration page access
@@ -133,10 +135,11 @@ test.describe('Login Features Testing', () => {
 
     // Login first
     await page.goto(`${baseURL}/auth/signin`);
-    await page.fill('input[type="email"], input[name="email"]', 'demo@moneyquest.com');
-    await page.fill('input[type="password"], input[name="password"]', 'demo123');
-    await page.click('button:has-text("Sign In"), button:has-text("Login")');
-    await page.waitForURL(/\/dashboard/);
+    // Use demo button pattern for consistent authentication
+    await page.click('button:has-text("Free Tier - free@moneyquest.com")');
+    await page.waitForTimeout(500);
+    await page.click('button[type="submit"]');
+    await page.waitForURL('**/dashboard', { timeout: 10000 });
     console.log('🔐 Successfully logged in');
 
     // Check navigation links are present
@@ -161,7 +164,7 @@ test.describe('Login Features Testing', () => {
     }
 
     // Check user info is displayed
-    await expect(page.locator('text=Demo User')).toBeVisible();
+    await expect(page.locator('text=Free User')).toBeVisible();
     console.log('✅ User information displayed');
 
     // Check sign out button is present
@@ -174,10 +177,11 @@ test.describe('Login Features Testing', () => {
 
     // Login first
     await page.goto(`${baseURL}/auth/signin`);
-    await page.fill('input[type="email"], input[name="email"]', 'demo@moneyquest.com');
-    await page.fill('input[type="password"], input[name="password"]', 'demo123');
-    await page.click('button:has-text("Sign In"), button:has-text("Login")');
-    await page.waitForURL(/\/dashboard/);
+    // Use demo button pattern for consistent authentication
+    await page.click('button:has-text("Free Tier - free@moneyquest.com")');
+    await page.waitForTimeout(500);
+    await page.click('button[type="submit"]');
+    await page.waitForURL('**/dashboard', { timeout: 10000 });
     console.log('🔐 Successfully logged in');
 
     // Click logout
@@ -202,10 +206,11 @@ test.describe('Login Features Testing', () => {
 
     // Login first
     await page.goto(`${baseURL}/auth/signin`);
-    await page.fill('input[type="email"], input[name="email"]', 'demo@moneyquest.com');
-    await page.fill('input[type="password"], input[name="password"]', 'demo123');
-    await page.click('button:has-text("Sign In"), button:has-text("Login")');
-    await page.waitForURL(/\/dashboard/);
+    // Use demo button pattern for consistent authentication
+    await page.click('button:has-text("Free Tier - free@moneyquest.com")');
+    await page.waitForTimeout(500);
+    await page.click('button[type="submit"]');
+    await page.waitForURL('**/dashboard', { timeout: 10000 });
     console.log('🔐 Successfully logged in');
 
     // Check collaboration page for upgrade prompts
@@ -232,10 +237,11 @@ test.describe('Login Features Testing', () => {
 
     // Login first
     await page.goto(`${baseURL}/auth/signin`);
-    await page.fill('input[type="email"], input[name="email"]', 'demo@moneyquest.com');
-    await page.fill('input[type="password"], input[name="password"]', 'demo123');
-    await page.click('button:has-text("Sign In"), button:has-text("Login")');
-    await page.waitForURL(/\/dashboard/);
+    // Use demo button pattern for consistent authentication
+    await page.click('button:has-text("Free Tier - free@moneyquest.com")');
+    await page.waitForTimeout(500);
+    await page.click('button[type="submit"]');
+    await page.waitForURL('**/dashboard', { timeout: 10000 });
     console.log('🔐 Successfully logged in');
 
     // Refresh the page
@@ -256,7 +262,7 @@ test.describe('Login Features Testing', () => {
     // Try invalid credentials
     await page.fill('input[type="email"], input[name="email"]', 'invalid@example.com');
     await page.fill('input[type="password"], input[name="password"]', 'wrongpassword');
-    await page.click('button:has-text("Sign In"), button:has-text("Login")');
+    await page.click('button[type="submit"]');
     console.log('🔐 Attempted login with invalid credentials');
 
     // Wait a moment for authentication to process

@@ -16,6 +16,7 @@ test.describe('Subscription Feature Gating & Plan Changes', () => {
     // Sign in as free user
     await page.goto('/auth/signin');
     await page.fill('input[name="email"]', 'free@moneyquest.com');
+    await page.fill('input[name="password"]', 'free123');
     await page.click('button[type="submit"]');
 
     await expect(page.locator('text=Dashboard')).toBeVisible({ timeout: 10000 });
@@ -51,6 +52,7 @@ test.describe('Subscription Feature Gating & Plan Changes', () => {
     // Sign in as plus user
     await page.goto('/auth/signin');
     await page.fill('input[name="email"]', 'plus@moneyquest.com');
+    await page.fill('input[name="password"]', 'plus123');
     await page.click('button[type="submit"]');
 
     await expect(page.locator('text=Dashboard')).toBeVisible({ timeout: 10000 });
@@ -82,6 +84,7 @@ test.describe('Subscription Feature Gating & Plan Changes', () => {
     // Sign in as premium user
     await page.goto('/auth/signin');
     await page.fill('input[name="email"]', 'premium@moneyquest.com');
+    await page.fill('input[name="password"]', 'premium123');
     await page.click('button[type="submit"]');
 
     await expect(page.locator('text=Dashboard')).toBeVisible({ timeout: 10000 });
@@ -107,6 +110,7 @@ test.describe('Subscription Feature Gating & Plan Changes', () => {
     // Test Free user limitations
     await page.goto('/auth/signin');
     await page.fill('input[name="email"]', 'free@moneyquest.com');
+    await page.fill('input[name="password"]', 'free123');
     await page.click('button[type="submit"]');
 
     await expect(page.locator('text=Dashboard')).toBeVisible({ timeout: 10000 });
@@ -130,6 +134,7 @@ test.describe('Subscription Feature Gating & Plan Changes', () => {
     // Now test Plus user
     await page.goto('/auth/signin');
     await page.fill('input[name="email"]', 'plus@moneyquest.com');
+    await page.fill('input[name="password"]', 'plus123');
     await page.click('button[type="submit"]');
 
     await expect(page.locator('text=Dashboard')).toBeVisible({ timeout: 10000 });
@@ -150,6 +155,7 @@ test.describe('Subscription Feature Gating & Plan Changes', () => {
     // Finally test Premium user
     await page.goto('/auth/signin');
     await page.fill('input[name="email"]', 'premium@moneyquest.com');
+    await page.fill('input[name="password"]', 'premium123');
     await page.click('button[type="submit"]');
 
     await expect(page.locator('text=Dashboard')).toBeVisible({ timeout: 10000 });
@@ -172,6 +178,7 @@ test.describe('Subscription Feature Gating & Plan Changes', () => {
     // Test Plus user billing management
     await page.goto('/auth/signin');
     await page.fill('input[name="email"]', 'plus@moneyquest.com');
+    await page.fill('input[name="password"]', 'plus123');
     await page.click('button[type="submit"]');
 
     await expect(page.locator('text=Dashboard')).toBeVisible({ timeout: 10000 });
@@ -191,6 +198,7 @@ test.describe('Subscription Feature Gating & Plan Changes', () => {
     // Test Premium user
     await page.goto('/auth/signin');
     await page.fill('input[name="email"]', 'premium@moneyquest.com');
+    await page.fill('input[name="password"]', 'premium123');
     await page.click('button[type="submit"]');
 
     await expect(page.locator('text=Dashboard')).toBeVisible({ timeout: 10000 });
@@ -241,6 +249,7 @@ test.describe('Subscription Feature Gating & Plan Changes', () => {
     // Test that free users see appropriate feature gates
     await page.goto('/auth/signin');
     await page.fill('input[name="email"]', 'free@moneyquest.com');
+    await page.fill('input[name="password"]', 'free123');
     await page.click('button[type="submit"]');
 
     await expect(page.locator('text=Dashboard')).toBeVisible({ timeout: 10000 });

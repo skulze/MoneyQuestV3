@@ -26,23 +26,18 @@ function SignInForm() {
       const result = await signIn('demo-login', {
         email: formData.email,
         password: formData.password,
-        redirect: false
+        callbackUrl: callbackUrl
       });
 
+      // If we get here and result exists, there was an error
       if (result?.error) {
         setError('Invalid credentials. Please try again.');
-      } else if (result?.ok) {
-        // Get the updated session to initialize local data
-        const session = await getSession();
-        console.log('User signed in:', session?.user);
-
-        // Redirect to dashboard
-        router.push(callbackUrl);
+        setIsLoading(false);
       }
+      // If signIn succeeds with callbackUrl, NextAuth handles the redirect automatically
     } catch (err) {
       setError('An error occurred. Please try again.');
       console.error('Sign in error:', err);
-    } finally {
       setIsLoading(false);
     }
   };
@@ -73,10 +68,10 @@ function SignInForm() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome to MoneyQuestV3
+            Sign In
           </h1>
           <p className="text-gray-600">
-            Sign in to your personal finance dashboard
+            Welcome to MoneyQuestV3 - Sign in to your personal finance dashboard
           </p>
         </div>
 

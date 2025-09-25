@@ -119,8 +119,8 @@ test.describe('Authentication System', () => {
       const emailInput = page.locator('input[type="email"], input[name="email"], input[name="username"]').first();
       const passwordInput = page.locator('input[type="password"], input[name="password"]').first();
 
-      await emailInput.fill('demo@moneyquest.com');
-      await passwordInput.fill('demo123');
+      await emailInput.fill('free@moneyquest.com');
+      await passwordInput.fill('free123');
       console.log('📝 Filled in demo credentials');
 
       // Submit the form
@@ -138,7 +138,7 @@ test.describe('Authentication System', () => {
       console.log('✅ Dashboard loaded with welcome message');
 
       // Verify user is shown as authenticated
-      await expect(page.locator('text=Demo User')).toBeVisible();
+      await expect(page.locator('text=Free User')).toBeVisible();
       console.log('✅ User info displayed correctly');
     });
 
@@ -160,8 +160,8 @@ test.describe('Authentication System', () => {
       const passwordInput = page.locator('input[type="password"], input[name="password"]').first();
       const signInButton = page.locator('button').filter({ hasText: /sign in/i }).first();
 
-      await emailInput.fill('demo@moneyquest.com');
-      await passwordInput.fill('demo123');
+      await emailInput.fill('free@moneyquest.com');
+      await passwordInput.fill('free123');
       await signInButton.click();
 
       // Should redirect back to original destination
@@ -215,8 +215,8 @@ test.describe('Authentication System', () => {
       const passwordInput = page.locator('input[type="password"], input[name="password"]').first();
       const signInButton = page.locator('button').filter({ hasText: /sign in/i }).first();
 
-      await emailInput.fill('demo@moneyquest.com');
-      await passwordInput.fill('demo123');
+      await emailInput.fill('free@moneyquest.com');
+      await passwordInput.fill('free123');
       await signInButton.click();
 
       await page.waitForURL(/\/dashboard/);
@@ -228,7 +228,7 @@ test.describe('Authentication System', () => {
 
       // Should still be on dashboard (session maintained)
       await expect(page).toHaveURL(/\/dashboard/);
-      await expect(page.locator('text=Demo User')).toBeVisible();
+      await expect(page.locator('text=Free User')).toBeVisible();
       console.log('✅ Session maintained after page reload');
     });
 
@@ -241,8 +241,8 @@ test.describe('Authentication System', () => {
       const passwordInput = page.locator('input[type="password"], input[name="password"]').first();
       const signInButton = page.locator('button').filter({ hasText: /sign in/i }).first();
 
-      await emailInput.fill('demo@moneyquest.com');
-      await passwordInput.fill('demo123');
+      await emailInput.fill('free@moneyquest.com');
+      await passwordInput.fill('free123');
       await signInButton.click();
 
       await page.waitForURL(/\/dashboard/);
@@ -281,8 +281,8 @@ test.describe('Authentication System', () => {
       const passwordInput = page.locator('input[type="password"], input[name="password"]').first();
       const signInButton = page.locator('button').filter({ hasText: /sign in/i }).first();
 
-      await emailInput.fill('demo@moneyquest.com');
-      await passwordInput.fill('demo123');
+      await emailInput.fill('free@moneyquest.com');
+      await passwordInput.fill('free123');
       await signInButton.click();
 
       await page.waitForURL(/\/dashboard/);
@@ -310,7 +310,7 @@ test.describe('Authentication System', () => {
       }
 
       // Should show user info and sign out button
-      await expect(page.locator('text=Demo User')).toBeVisible();
+      await expect(page.locator('text=Free User')).toBeVisible();
       await expect(page.locator('button:has-text("Sign Out")')).toBeVisible();
       console.log('✅ User info and sign out button visible');
     });
@@ -348,8 +348,8 @@ test.describe('Authentication System', () => {
       const passwordInput = page.locator('input[type="password"], input[name="password"]').first();
       const signInButton = page.locator('button').filter({ hasText: /sign in/i }).first();
 
-      await emailInput.fill('demo@moneyquest.com');
-      await passwordInput.fill('demo123');
+      await emailInput.fill('free@moneyquest.com');
+      await passwordInput.fill('free123');
       await signInButton.click();
 
       // Should handle error gracefully (stay on page or show error)
@@ -384,8 +384,8 @@ test.describe('Plus Tier Feature Access', () => {
     const passwordInput = page.locator('input[type="password"], input[name="password"]').first();
     const signInButton = page.locator('button').filter({ hasText: /sign in/i }).first();
 
-    await emailInput.fill('demo@moneyquest.com');
-    await passwordInput.fill('demo123');
+    await emailInput.fill('free@moneyquest.com');
+    await passwordInput.fill('free123');
     await signInButton.click();
 
     await page.waitForURL(/\/dashboard/);
