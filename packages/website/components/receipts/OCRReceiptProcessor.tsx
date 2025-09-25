@@ -1,7 +1,9 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, Button } from '@/components/ui';
 import { FeatureGate } from '@/components/subscription/FeatureGate';
 import { Camera, Upload, FileImage, CheckCircle, AlertCircle, Loader2, X, Edit } from 'lucide-react';
+import { ocrService } from '@/services/ocrService';
+import { useDataEngine } from '@/hooks/useDataEngine';
 
 interface ProcessedTransaction {
   id: string;
@@ -20,10 +22,20 @@ interface ProcessedTransaction {
 
 export function OCRReceiptProcessor() {
   const [isProcessing, setIsProcessing] = useState(false);
+  const [processingStatus, setProcessingStatus] = useState<string>('');
   const [processedReceipts, setProcessedReceipts] = useState<ProcessedTransaction[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { dataEngine } = useDataEngine();
+
+  // Cleanup OCR service when component unmounts
+  useEffect(() => {
+    return () => {
+      ocrService.cleanup().catch(console.error);
+    };
+  }, []);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -32,6 +44,30 @@ export function OCRReceiptProcessor() {
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
     }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    const imageFile = files.find(file => file.type.startsWith('image/'));
+
+    if (imageFile) {
+      setSelectedFile(imageFile);
+      const url = URL.createObjectURL(imageFile);
+      setPreviewUrl(url);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
   };
 
   const handleCameraCapture = async () => {
@@ -61,28 +97,37 @@ export function OCRReceiptProcessor() {
     if (!selectedFile) return;
 
     setIsProcessing(true);
-    try {
-      // Simulate OCR processing - in reality this would call the LocalDataEngine.processReceiptOCR()
-      await new Promise(resolve => setTimeout(resolve, 3000));
+    setProcessingStatus('Initializing OCR engine...');
 
-      // Mock processed transaction data
+    try {
+      // Initialize OCR engine
+      await ocrService.initialize();
+      setProcessingStatus('Reading receipt image...');
+
+      // Process image with OCR
+      const ocrResult = await ocrService.processReceiptImage(selectedFile);
+      setProcessingStatus('Extracting transaction details...');
+
+      // Just show the raw OCR text for now
       const processed: ProcessedTransaction = {
         id: Date.now().toString(),
-        merchant: 'Whole Foods Market',
-        amount: 47.82,
+        merchant: 'RAW OCR TEXT',
+        amount: 0,
         date: new Date().toISOString().split('T')[0],
-        category: 'Groceries',
-        items: [
-          { name: 'Organic Bananas', price: 3.99, quantity: 1 },
-          { name: 'Almond Milk', price: 4.99, quantity: 2 },
-          { name: 'Whole Grain Bread', price: 5.49, quantity: 1 },
-          { name: 'Mixed Greens', price: 6.99, quantity: 1 },
-          { name: 'Chicken Breast', price: 12.99, quantity: 2 },
-          { name: 'Tax', price: 3.38, quantity: 1 },
-        ],
-        confidence: 94,
+        category: 'OCR Debug',
+        items: [{
+          name: 'RAW_OCR_OUTPUT',
+          price: 0
+        }],
+        confidence: Math.round(ocrResult.confidence),
         status: 'reviewing'
       };
+
+      console.log('✅ Raw OCR text extracted:', ocrResult.text);
+      console.log('OCR Confidence:', ocrResult.confidence);
+
+      // Store the raw text in the processed receipt for display
+      (processed as any).rawOcrText = ocrResult.text;
 
       setProcessedReceipts(prev => [processed, ...prev]);
       setSelectedFile(null);
@@ -92,22 +137,67 @@ export function OCRReceiptProcessor() {
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
+
+      setProcessingStatus('');
     } catch (error) {
-      console.error('OCR processing failed:', error);
-      alert('Failed to process receipt. Please try again.');
+      console.error('❌ OCR processing failed:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      alert(`Failed to process receipt: ${errorMessage}\n\nPlease try again with a clearer image.`);
+      setProcessingStatus('');
     } finally {
       setIsProcessing(false);
     }
   };
 
-  const confirmTransaction = (receiptId: string) => {
-    setProcessedReceipts(prev =>
-      prev.map(receipt =>
-        receipt.id === receiptId
-          ? { ...receipt, status: 'confirmed' as const }
-          : receipt
-      )
-    );
+  const confirmTransaction = async (receiptId: string) => {
+    const receipt = processedReceipts.find(r => r.id === receiptId);
+    if (!receipt || !dataEngine) return;
+
+    try {
+      // Create transaction splits for each item or a single transaction
+      const splits = receipt.items && receipt.items.length > 0
+        ? receipt.items.map(item => ({
+            amount: item.price,
+            category: receipt.category || 'Shopping',
+            description: item.name,
+            quantity: item.quantity
+          }))
+        : [{
+            amount: receipt.amount,
+            category: receipt.category || 'Shopping',
+            description: receipt.merchant,
+          }];
+
+      // Add transaction to data engine
+      const transaction = await dataEngine.addTransaction({
+        description: receipt.merchant,
+        amount: -receipt.amount, // Negative for expense
+        date: new Date(receipt.date),
+        category: receipt.category || 'Shopping',
+        splits: splits.length > 1 ? splits : undefined,
+        metadata: {
+          source: 'ocr',
+          originalText: receipt.items?.map(i => i.name).join(', ') || receipt.merchant,
+          confidence: receipt.confidence
+        }
+      });
+
+      console.log('✅ Transaction saved to data engine:', transaction);
+
+      // Update receipt status
+      setProcessedReceipts(prev =>
+        prev.map(r =>
+          r.id === receiptId
+            ? { ...r, status: 'confirmed' as const }
+            : r
+        )
+      );
+
+      alert('✅ Transaction added to your account!');
+    } catch (error) {
+      console.error('❌ Failed to save transaction:', error);
+      alert('Failed to save transaction. Please try again.');
+    }
   };
 
   const editTransaction = (receiptId: string) => {
@@ -155,16 +245,23 @@ export function OCRReceiptProcessor() {
             <div className="space-y-4">
               {/* Upload Options */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Button
-                  variant="outline"
-                  className="h-32 flex flex-col items-center justify-center space-y-2 border-dashed border-2"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isProcessing}
+                <label
+                  htmlFor="file-upload-input"
+                  className="cursor-pointer"
+                  onDrop={handleDrop}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
                 >
-                  <Upload className="w-8 h-8 text-gray-400" />
-                  <span className="text-sm font-medium">Upload Photo</span>
-                  <span className="text-xs text-gray-500">JPG, PNG up to 10MB</span>
-                </Button>
+                  <div className={`h-32 flex flex-col items-center justify-center space-y-2 border-dashed border-2 rounded-lg transition-colors ${
+                    isDragOver
+                      ? 'border-blue-400 bg-blue-50'
+                      : 'border-gray-300 hover:border-gray-400 bg-white hover:bg-gray-50'
+                  }`}>
+                    <Upload className="w-8 h-8 text-gray-400" />
+                    <span className="text-sm font-medium">Upload or Drop Photo</span>
+                    <span className="text-xs text-gray-500">JPG, PNG up to 10MB</span>
+                  </div>
+                </label>
 
                 <Button
                   variant="outline"
@@ -179,11 +276,16 @@ export function OCRReceiptProcessor() {
               </div>
 
               <input
+                id="file-upload-input"
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
                 onChange={handleFileSelect}
-                className="hidden"
+                style={{
+                  position: 'absolute',
+                  left: '-9999px',
+                  top: '-9999px'
+                }}
               />
 
               {/* Image Preview & Processing */}
@@ -238,7 +340,12 @@ export function OCRReceiptProcessor() {
                 <div className="text-center py-8">
                   <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-purple-600" />
                   <p className="text-lg font-medium text-gray-900">Processing Receipt...</p>
-                  <p className="text-sm text-gray-600">Using AI to extract transaction details</p>
+                  <p className="text-sm text-gray-600">
+                    {processingStatus || 'Using OCR to extract transaction details'}
+                  </p>
+                  <div className="mt-4 text-xs text-gray-500">
+                    This may take 30-60 seconds for first-time OCR initialization
+                  </div>
                 </div>
               )}
             </div>
@@ -282,19 +389,14 @@ export function OCRReceiptProcessor() {
                       </div>
                     </div>
 
-                    {/* Items List */}
-                    {receipt.items && receipt.items.length > 0 && (
+                    {/* Raw OCR Text */}
+                    {(receipt as any).rawOcrText && (
                       <div className="mb-4">
-                        <h5 className="text-sm font-medium text-gray-700 mb-2">Items:</h5>
-                        <div className="bg-gray-50 rounded-lg p-3">
-                          <div className="space-y-1 text-xs">
-                            {receipt.items.map((item, index) => (
-                              <div key={index} className="flex justify-between">
-                                <span>{item.quantity && item.quantity > 1 && `${item.quantity}x `}{item.name}</span>
-                                <span>${item.price.toFixed(2)}</span>
-                              </div>
-                            ))}
-                          </div>
+                        <h5 className="text-sm font-medium text-gray-700 mb-2">Raw OCR Text:</h5>
+                        <div className="bg-gray-50 rounded-lg p-3 max-h-64 overflow-y-auto">
+                          <pre className="text-xs whitespace-pre-wrap font-mono text-gray-800">
+                            {(receipt as any).rawOcrText}
+                          </pre>
                         </div>
                       </div>
                     )}

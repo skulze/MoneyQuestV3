@@ -63,41 +63,41 @@ const authOptions: NextAuthOptions = {
           };
         }
 
-        // Free tier demo user
+        // John (Free tier demo user)
         if (
-          credentials?.email === 'free@moneyquest.com' &&
-          credentials?.password === 'free123'
+          credentials?.email === 'john@moneyquest.com' &&
+          credentials?.password === 'john123'
         ) {
           return {
-            id: 'free-user-123',
-            email: 'free@moneyquest.com',
-            name: 'Free User',
+            id: 'john-user-123',
+            email: 'john@moneyquest.com',
+            name: 'John',
             subscription: 'free'
           };
         }
 
-        // Plus tier demo user
+        // Sarah (Plus tier demo user)
         if (
-          credentials?.email === 'plus@moneyquest.com' &&
-          credentials?.password === 'plus123'
+          credentials?.email === 'sarah@moneyquest.com' &&
+          credentials?.password === 'sarah123'
         ) {
           return {
-            id: 'plus-user-123',
-            email: 'plus@moneyquest.com',
-            name: 'Plus User',
+            id: 'sarah-user-123',
+            email: 'sarah@moneyquest.com',
+            name: 'Sarah',
             subscription: 'plus'
           };
         }
 
-        // Premium tier demo user
+        // Adam (Premium tier demo user)
         if (
-          credentials?.email === 'premium@moneyquest.com' &&
-          credentials?.password === 'premium123'
+          credentials?.email === 'adam@moneyquest.com' &&
+          credentials?.password === 'adam123'
         ) {
           return {
-            id: 'premium-user-123',
-            email: 'premium@moneyquest.com',
-            name: 'Premium User',
+            id: 'adam-user-123',
+            email: 'adam@moneyquest.com',
+            name: 'Adam',
             subscription: 'premium'
           };
         }
@@ -165,7 +165,7 @@ const authOptions: NextAuthOptions = {
     }
   },
 
-  debug: process.env.NODE_ENV === 'development',
+  debug: process.env.NEXTAUTH_DEBUG === 'true',
 };
 
 const handler = NextAuth(authOptions);

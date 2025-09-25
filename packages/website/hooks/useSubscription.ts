@@ -163,6 +163,19 @@ export function useSubscription(): UseSubscriptionReturn {
 
     try {
       setError(null);
+
+      // Check localStorage first for demo mode subscription overrides
+      const localSubscriptionKey = `demo_subscription_${session.user.email}`;
+      const localSubscription = localStorage.getItem(localSubscriptionKey);
+
+      if (localSubscription) {
+        const parsedSubscription = JSON.parse(localSubscription);
+        console.log('Loading demo subscription from localStorage:', parsedSubscription);
+        setSubscription(parsedSubscription);
+        setIsLoading(false);
+        return;
+      }
+
       const response = await fetch('/api/subscriptions/status');
 
       if (!response.ok) {
@@ -176,14 +189,15 @@ export function useSubscription(): UseSubscriptionReturn {
       setError('Failed to load subscription status');
 
       // Fallback to free tier
-      setSubscription({
+      const fallbackSubscription = {
         tier: 'FREE',
         tierName: 'Free',
         price: 0,
         features: SUBSCRIPTION_TIERS.FREE.features,
         limits: SUBSCRIPTION_TIERS.FREE.limits,
         isActive: true,
-      });
+      };
+      setSubscription(fallbackSubscription);
     } finally {
       setIsLoading(false);
     }
@@ -235,9 +249,54 @@ export function useSubscription(): UseSubscriptionReturn {
         window.location.href = checkoutUrl;
       } else {
         // Handle demo mode gracefully
-        const errorData = await response.text().catch(() => '{}');
-        console.log('Demo mode: Upgrade to', tier, 'requested');
-        throw new Error(`Demo Mode: Stripe not configured. Would upgrade to ${tier} ($${SUBSCRIPTION_TIERS[tier].price}/month)`);
+        try {
+          const errorData = await response.json();
+          if (errorData.isDemoMode) {
+            console.log('Demo mode: Simulating upgrade to', tier);
+
+            // Show notification about what would normally happen
+            const confirmed = window.confirm(
+              `🛒 Demo Mode Simulation\n\n` +
+              `In a real environment, this would:\n` +
+              `• Redirect you to Stripe checkout\n` +
+              `• Process payment for ${tier} ($${SUBSCRIPTION_TIERS[tier].price}/month)\n` +
+              `• Update your subscription\n\n` +
+              `For this demo, we'll simulate the upgrade locally.\n\n` +
+              `Proceed with demo upgrade to ${tier}?`
+            );
+
+            if (confirmed) {
+              // Simulate the tier upgrade locally
+              const newSubscription = {
+                tier: tier,
+                tierName: SUBSCRIPTION_TIERS[tier].name,
+                price: SUBSCRIPTION_TIERS[tier].price,
+                features: SUBSCRIPTION_TIERS[tier].features,
+                limits: SUBSCRIPTION_TIERS[tier].limits,
+                isActive: true,
+              };
+
+              setSubscription(newSubscription);
+
+              // Save to localStorage for persistence across navigation
+              if (session?.user?.email) {
+                const localSubscriptionKey = `demo_subscription_${session.user.email}`;
+                localStorage.setItem(localSubscriptionKey, JSON.stringify(newSubscription));
+                console.log('Saved demo subscription to localStorage:', newSubscription);
+              }
+
+              // Show success message
+              alert(`✅ Demo upgrade successful!\n\nYou are now on the ${tier} plan ($${SUBSCRIPTION_TIERS[tier].price}/month).\n\nThis is a local simulation - no actual billing occurred.`);
+              return; // Success, don't throw error
+            } else {
+              throw new Error('Upgrade cancelled by user');
+            }
+          } else {
+            throw new Error(errorData.error || 'Failed to create checkout session');
+          }
+        } catch (parseError) {
+          throw new Error(`Demo Mode: Stripe not configured. Would upgrade to ${tier} ($${SUBSCRIPTION_TIERS[tier].price}/month)`);
+        }
       }
     } catch (err) {
       console.error('Error starting upgrade:', err);
@@ -257,7 +316,43 @@ export function useSubscription(): UseSubscriptionReturn {
       } else {
         // Handle demo mode gracefully
         console.log('Demo mode: Billing management requested');
-        throw new Error('Demo Mode: Stripe not configured. Would open billing portal');
+
+        // Show demo billing management options
+        const options = `Demo Billing Management\n\nAvailable options:\n• Downgrade to Free (cancel subscription)\n• View current plan details\n• Simulate plan changes`;
+
+        if (subscription?.tier !== 'FREE') {
+          const confirmed = window.confirm(
+            `${options}\n\nWould you like to downgrade to the Free plan?\n\n(This simulates canceling your subscription)`
+          );
+
+          if (confirmed) {
+            // Simulate downgrade to free
+            const newSubscription = {
+              tier: 'FREE',
+              tierName: SUBSCRIPTION_TIERS.FREE.name,
+              price: SUBSCRIPTION_TIERS.FREE.price,
+              features: SUBSCRIPTION_TIERS.FREE.features,
+              limits: SUBSCRIPTION_TIERS.FREE.limits,
+              isActive: true,
+            };
+
+            setSubscription(newSubscription);
+
+            // Save to localStorage for persistence across navigation
+            if (session?.user?.email) {
+              const localSubscriptionKey = `demo_subscription_${session.user.email}`;
+              localStorage.setItem(localSubscriptionKey, JSON.stringify(newSubscription));
+              console.log('Saved demo downgrade to localStorage:', newSubscription);
+            }
+
+            alert(`✅ Demo downgrade successful!\n\nYou are now on the Free plan.\n\nThis is a local simulation - no actual billing changes occurred.`);
+            return; // Success, don't throw error
+          }
+        } else {
+          alert('Demo Mode: You are already on the Free plan.\n\nIn a real environment, this would open the Stripe billing portal.');
+        }
+
+        throw new Error('Demo Mode: Billing portal simulation completed');
       }
     } catch (err) {
       console.error('Error opening billing portal:', err);

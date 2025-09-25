@@ -54,8 +54,25 @@ export function SubscriptionDashboard() {
       await manageBilling();
     } catch (error) {
       console.error('Failed to open billing portal:', error);
+      // Show specific error message to user, especially for demo mode
+      const errorMessage = error instanceof Error ? error.message : 'Failed to open billing portal. Please try again.';
+      alert(errorMessage);
     } finally {
       setIsManaging(false);
+    }
+  };
+
+  const handleUpgrade = async (tier: 'PLUS' | 'PREMIUM') => {
+    try {
+      await upgrade(tier);
+      // If we reach here, the upgrade was successful (demo mode simulation completed)
+    } catch (error) {
+      // Only show error alerts for actual failures, not cancellations
+      if (error instanceof Error && error.message !== 'Upgrade cancelled by user') {
+        console.error('Error upgrading:', error);
+        const errorMessage = error.message;
+        alert(errorMessage);
+      }
     }
   };
 
@@ -297,7 +314,7 @@ export function SubscriptionDashboard() {
                   </p>
                   <Button
                     className="w-full"
-                    onClick={() => upgrade('PLUS')}
+                    onClick={() => handleUpgrade('PLUS')}
                   >
                     Upgrade to Plus
                   </Button>
@@ -315,7 +332,7 @@ export function SubscriptionDashboard() {
                 </p>
                 <Button
                   className="w-full"
-                  onClick={() => upgrade('PREMIUM')}
+                  onClick={() => handleUpgrade('PREMIUM')}
                 >
                   Upgrade to Premium
                 </Button>

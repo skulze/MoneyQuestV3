@@ -5,18 +5,18 @@ import { redirect } from 'next/navigation';
 import { useAuthGuard } from '@/hooks/useAuthGuard';
 import { Button, Card, CardHeader, CardTitle, CardContent, Input, Modal } from '@/components/ui';
 import { TrendingUp, Plus, PieChart, DollarSign, BarChart3, Target } from 'lucide-react';
-import { LocalDataEngine } from '@moneyquest/shared/src/data-engine/LocalDataEngine';
 import { EnhancedInvestmentCharts } from '@/components/investments/EnhancedInvestmentCharts';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useDataEngine } from '@/hooks/useDataEngine';
 
 export default function InvestmentsPage() {
   const { session, isLoading: authLoading } = useAuthGuard('/investments');
-  const { subscription } = useSubscription();
+  const { subscription, canUseFeature } = useSubscription();
+  const { dataEngine, isInitializing } = useDataEngine();
   const [showAddPortfolio, setShowAddPortfolio] = useState(false);
   const [showAddInvestment, setShowAddInvestment] = useState(false);
   const [portfolios, setPortfolios] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [dataEngine] = useState(() => new LocalDataEngine());
 
   // Form states
   const [portfolioForm, setPortfolioForm] = useState({
@@ -34,12 +34,17 @@ export default function InvestmentsPage() {
   });
 
   useEffect(() => {
-    if (session?.user?.email) {
+    if (session?.user?.email && dataEngine && !isInitializing) {
       loadPortfolios();
     }
-  }, [session]);
+  }, [session, dataEngine, isInitializing]);
 
   const loadPortfolios = async () => {
+    if (!dataEngine || isInitializing) {
+      console.log('DataEngine not ready, skipping portfolio load');
+      return;
+    }
+
     try {
       setLoading(true);
       const userId = session?.user?.email || 'demo-user';
@@ -112,6 +117,11 @@ export default function InvestmentsPage() {
 
   // Handle portfolio creation
   const handleCreatePortfolio = async () => {
+    if (!dataEngine || isInitializing) {
+      console.log('DataEngine not ready, skipping portfolio creation');
+      return;
+    }
+
     try {
       const userId = session?.user?.email || 'demo-user';
       await dataEngine.createPortfolio(userId, {
@@ -135,14 +145,17 @@ export default function InvestmentsPage() {
 
   // Handle investment creation
   const handleCreateInvestment = async () => {
+    if (!dataEngine || isInitializing) {
+      console.log('DataEngine not ready, skipping investment creation');
+      return;
+    }
+
     try {
-      const userId = session?.user?.email || 'demo-user';
       const quantity = parseFloat(investmentForm.quantity);
       const costBasis = parseFloat(investmentForm.costBasis);
       const currentPrice = parseFloat(investmentForm.currentPrice);
 
-      await dataEngine.createInvestment(userId, {
-        portfolioId: investmentForm.portfolioId,
+      await dataEngine.createInvestment(investmentForm.portfolioId, {
         symbol: investmentForm.symbol.toUpperCase(),
         name: investmentForm.name,
         quantity,
@@ -259,7 +272,7 @@ export default function InvestmentsPage() {
         </div>
 
         {/* Enhanced Investment Charts (Plus Feature) */}
-        {enrichedPortfolios.length > 0 && subscription?.canUseFeature('multiUser') && (
+        {enrichedPortfolios.length > 0 && canUseFeature('enhancedInvestments') && (
           <EnhancedInvestmentCharts
             investments={enrichedPortfolios.flatMap(p =>
               (p.investments || []).map((inv: any) => ({

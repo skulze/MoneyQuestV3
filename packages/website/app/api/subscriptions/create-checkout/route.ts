@@ -4,11 +4,6 @@ import { stripe, SUBSCRIPTION_TIERS } from '@/lib/stripe';
 
 export async function POST(request: NextRequest) {
   try {
-    if (!stripe) {
-      console.error('Stripe not configured - missing STRIPE_SECRET_KEY');
-      return NextResponse.json({ error: 'Stripe not configured' }, { status: 500 });
-    }
-
     const session = await getServerSession();
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -21,8 +16,19 @@ export async function POST(request: NextRequest) {
     }
 
     const tierConfig = SUBSCRIPTION_TIERS[tier as keyof typeof SUBSCRIPTION_TIERS];
-    if (!tierConfig.priceId) {
-      return NextResponse.json({ error: 'Price ID not configured' }, { status: 500 });
+
+    // Check if Stripe is properly configured for production
+    if (!stripe || !tierConfig.priceId ||
+        tierConfig.priceId.startsWith('price_your_') ||
+        tierConfig.priceId.includes('_demo') ||
+        tierConfig.priceId.includes('_test_') && tierConfig.priceId.includes('_tier_')) {
+      console.log('Demo mode: Stripe not configured or using placeholder/demo price IDs');
+      return NextResponse.json({
+        error: 'Demo Mode: Stripe not configured. Please set up valid Stripe price IDs in environment variables.',
+        isDemoMode: true,
+        tier: tier,
+        price: tierConfig.price
+      }, { status: 400 });
     }
 
     // Create Stripe checkout session

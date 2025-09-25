@@ -16,7 +16,7 @@ export interface FamilyMember {
 
 export function useFamilyManagement() {
   const { dataEngine } = useDataEngine();
-  const { subscription } = useSubscription();
+  const { subscription, canUseFeature } = useSubscription();
 
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -76,7 +76,7 @@ export function useFamilyManagement() {
 
     try {
       // Check subscription permissions
-      if (!subscription?.canUseFeature('multiUser')) {
+      if (!canUseFeature('multiUser')) {
         throw new UpgradeRequiredError('Family sharing requires Plus ($2.99/month)');
       }
 
@@ -212,6 +212,6 @@ export function useFamilyManagement() {
     resendInvitation,
     loadFamilyMembers,
     getUsageStats,
-    canUseFeature: subscription?.canUseFeature('multiUser') || false,
+    canUseFeature: canUseFeature('multiUser'),
   };
 }

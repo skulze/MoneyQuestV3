@@ -124,7 +124,17 @@
       "Bash(timeout 30s npx playwright test tests/07-subscription.spec.js --reporter=line)",
       "Bash(PLAYWRIGHT_BASE_URL=http://localhost:3000 timeout 30s npx playwright test tests/07-subscription.spec.js --reporter=line)",
       "Bash(PLAYWRIGHT_BASE_URL=http://localhost:3000 timeout 60s npx playwright test tests/07-subscription.spec.js --reporter=line --workers=32)",
-      "mcp__playwright__browser_navigate"
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_console_messages",
+      "Bash(mkdir:*)",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_snapshot",
+      "mcp__playwright__browser_type",
+      "mcp__playwright__browser_wait_for",
+      "mcp__playwright__browser_handle_dialog",
+      "mcp__playwright__browser_file_upload",
+      "mcp__playwright__browser_close",
+      "mcp__playwright__browser_take_screenshot"
     ],
     "deny": [
       "KillShell"

@@ -51,9 +51,9 @@ function SignInForm() {
 
   const handleDemoLogin = (userType: string) => {
     const demoUsers = {
-      free: { email: 'free@moneyquest.com', password: 'free123' },
-      plus: { email: 'plus@moneyquest.com', password: 'plus123' },
-      premium: { email: 'premium@moneyquest.com', password: 'premium123' }
+      free: { email: 'john@moneyquest.com', password: 'john123' },
+      plus: { email: 'sarah@moneyquest.com', password: 'sarah123' },
+      premium: { email: 'adam@moneyquest.com', password: 'adam123' }
     };
 
     const user = demoUsers[userType as keyof typeof demoUsers];
@@ -91,7 +91,7 @@ function SignInForm() {
               >
                 <div className="flex items-center">
                   <span className="w-3 h-3 bg-gray-400 rounded-full mr-3"></span>
-                  Free Tier - free@moneyquest.com
+                  John (Free Tier) - john@moneyquest.com
                 </div>
               </Button>
               <Button
@@ -102,7 +102,7 @@ function SignInForm() {
               >
                 <div className="flex items-center">
                   <span className="w-3 h-3 bg-blue-400 rounded-full mr-3"></span>
-                  Plus Tier ($2.99) - plus@moneyquest.com
+                  Sarah (Plus $2.99) - sarah@moneyquest.com
                 </div>
               </Button>
               <Button
@@ -113,7 +113,7 @@ function SignInForm() {
               >
                 <div className="flex items-center">
                   <span className="w-3 h-3 bg-purple-400 rounded-full mr-3"></span>
-                  Premium Tier ($9.99) - premium@moneyquest.com
+                  Adam (Premium $9.99) - adam@moneyquest.com
                 </div>
               </Button>
             </div>
@@ -143,6 +143,7 @@ function SignInForm() {
                 value={formData.email}
                 onChange={handleInputChange}
                 placeholder="your@email.com"
+                autocomplete="username"
                 required
                 disabled={isLoading}
               />
@@ -154,6 +155,7 @@ function SignInForm() {
                 value={formData.password}
                 onChange={handleInputChange}
                 placeholder="Enter your password"
+                autocomplete="current-password"
                 required
                 disabled={isLoading}
               />

@@ -8,7 +8,6 @@ import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent, Stat
 import { useDataEngine } from '@/hooks/useDataEngine';
 import { useSubscription } from '@/hooks/useSubscription';
 import { formatCurrency } from '@/lib/utils';
-import { LocalDataEngine } from '@moneyquest/shared/src/data-engine/LocalDataEngine';
 import { SubscriptionDashboard } from '@/components/subscription/SubscriptionDashboard';
 import { FeaturePrompt, UsageLimitGate } from '@/components/subscription/FeatureGate';
 
@@ -42,7 +41,6 @@ export default function DashboardPage() {
   const { subscription: subscriptionData } = useSubscription();
 
   // Investment tracking state
-  const [investmentEngine] = useState(() => new LocalDataEngine());
   const [portfolios, setPortfolios] = useState<any[]>([]);
   const [investmentStats, setInvestmentStats] = useState({
     totalPortfolioValue: 0,
@@ -69,11 +67,14 @@ export default function DashboardPage() {
   // Load investment data
   useEffect(() => {
     const loadInvestmentData = async () => {
-      if (!session?.user?.email) return;
+      if (!session?.user?.email || !dataEngine || isInitializing) {
+        console.log('DataEngine not ready or no session, skipping investment load');
+        return;
+      }
 
       try {
         const userId = session.user.email;
-        const portfolioData = await investmentEngine.getAllPortfoliosWithInvestments(userId);
+        const portfolioData = await dataEngine.getAllPortfoliosWithInvestments(userId);
         setPortfolios(portfolioData);
 
         // Calculate investment stats
@@ -109,7 +110,7 @@ export default function DashboardPage() {
     };
 
     loadInvestmentData();
-  }, [session, investmentEngine]);
+  }, [session, dataEngine, isInitializing]);
 
   const handleSignOut = async () => {
     try {

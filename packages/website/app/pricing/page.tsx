@@ -90,10 +90,14 @@ export default function PricingPage() {
 
     try {
       await upgrade(tier as 'PLUS' | 'PREMIUM');
+      // If we reach here, the upgrade was successful (demo mode simulation completed)
     } catch (error) {
-      console.error('Error upgrading:', error);
-      // Show error message to user
-      alert('Failed to start upgrade process. Please try again.');
+      // Only show error alerts for actual failures, not cancellations
+      if (error instanceof Error && error.message !== 'Upgrade cancelled by user') {
+        console.error('Error upgrading:', error);
+        const errorMessage = error.message;
+        alert(errorMessage);
+      }
     }
 
     setIsLoading(false);
@@ -107,7 +111,9 @@ export default function PricingPage() {
       await manageBilling();
     } catch (error) {
       console.error('Error opening billing portal:', error);
-      alert('Failed to open billing portal. Please try again.');
+      // Show specific error message to user, especially for demo mode
+      const errorMessage = error instanceof Error ? error.message : 'Failed to open billing portal. Please try again.';
+      alert(errorMessage);
     }
 
     setIsLoading(false);
