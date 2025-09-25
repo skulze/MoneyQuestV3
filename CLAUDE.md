@@ -308,15 +308,13 @@ npm run security-audit # Vulnerability scanning
 **CRITICAL: Only run ONE virtual environment/development server at a time.**
 - Never run multiple `npm run dev` processes simultaneously
 - Always stop existing development servers before starting new ones
-- **Git Bash Environment**: Use `pkill node` or `Ctrl+C` to stop servers
+- **Git Bash Environment**: Use `Ctrl+C` or `taskkill //F //IM node.exe` to stop servers
 - This prevents port conflicts, resource exhaustion, and debugging confusion
 
 ## Development Environment
 **Primary Development Platform: Windows 10/11 with Git Bash**
-- **ALWAYS use Git Bash commands**: `rm -rf`, `pkill`, `ps aux`, `find`, `grep`
-- **Never mix Windows CMD syntax**: Avoid `taskkill`, `rmdir /s`, `findstr`
-- **Consistent Unix-style commands**: Git Bash supports all standard Unix commands on Windows
-- **Process management**: Use `pkill node` instead of `taskkill /F /IM node.exe`
+- **ALWAYS use Git Bash commands**: `rm -rf`, `ps aux`, `find`, `grep` (Unix-style file operations)
+- **Process management**: Use Windows commands that work in Git Bash: `taskkill //F //IM node.exe`
 - **File operations**: Use `rm -rf .next` instead of `rmdir /s /q .next`
 - **Node/npm commands work identically**: `npm run dev`, `npx playwright test`
 
@@ -326,30 +324,29 @@ npm run security-audit # Vulnerability scanning
 **Best approach (in order of preference):**
 
 1. **Graceful shutdown first** - `Ctrl+C` in the terminal where the server is running
-2. **If that fails, use pkill** - `pkill -f "node.*dev"` or `pkill node`
-3. **Check for remaining processes** - `ps aux | grep node` to verify cleanup
+2. **If that fails, use taskkill** - `taskkill //F //IM node.exe`
+3. **Check for remaining processes** - `tasklist | findstr node` to verify cleanup
 
 **Complete cleanup sequence:**
 ```bash
 # 1. Try graceful shutdown first (Ctrl+C)
-# 2. If that fails, kill specific Node processes
-pkill -f "npm run dev"
-pkill -f "next dev"
-pkill node
+# 2. If that fails, kill Node processes
+taskkill //F //IM node.exe
 
 # 3. Verify all Node processes are gone
-ps aux | grep node
+tasklist | findstr node
 
 # 4. Clean up any remaining development artifacts
 rm -rf packages/website/.next/cache
 ```
 
 **Why this prevents orphaned processes:**
-- `pkill` sends SIGTERM first (graceful)
-- It targets the entire process tree
-- Git Bash handles process cleanup better than Windows CMD
-- Removes cached build artifacts that might hold file locks
+- `Ctrl+C` sends graceful shutdown signal first
+- `taskkill //F` forcefully terminates all node.exe processes when needed
+- Cleaning cache removes file locks from terminated processes
+- Works reliably in Git Bash on Windows
 
-**Avoid these Windows commands:**
-- `taskkill /F /IM node.exe` (too aggressive, can leave orphans)
-- `tasklist` + `tasklist` (Windows-specific, inconsistent in Git Bash)
+**Process management commands that work in Git Bash:**
+- `taskkill //F //IM node.exe` - Force kill all Node processes (use double slashes in Git Bash)
+- `tasklist | findstr node` - List running Node processes
+- `Ctrl+C` - Graceful shutdown (always try first)
