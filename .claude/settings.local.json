@@ -110,7 +110,9 @@
       "Bash(timeout 15s npx playwright test tests/login-features.spec.js:46 --reporter=line)",
       "Bash(timeout 15s npx playwright test tests/analytics.spec.js:17 --reporter=line)"
     ],
-    "deny": [],
+    "deny": [
+      "KillShell"
+    ],
     "ask": []
   }
 }

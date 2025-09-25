@@ -1,0 +1,48 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - heading "Sign In" [level=1] [ref=e5]
+      - paragraph [ref=e6]: Welcome to MoneyQuestV3 - Sign in to your personal finance dashboard
+    - generic [ref=e7]:
+      - generic [ref=e8]:
+        - heading "Demo Accounts" [level=5] [ref=e9]
+        - paragraph [ref=e10]: Try different subscription tiers
+      - generic [ref=e12]:
+        - button "Free Tier - free@moneyquest.com" [ref=e13] [cursor=pointer]:
+          - generic [ref=e14] [cursor=pointer]: Free Tier - free@moneyquest.com
+        - button "Plus Tier ($2.99) - plus@moneyquest.com" [ref=e16] [cursor=pointer]:
+          - generic [ref=e17] [cursor=pointer]: Plus Tier ($2.99) - plus@moneyquest.com
+        - button "Premium Tier ($9.99) - premium@moneyquest.com" [ref=e19] [cursor=pointer]:
+          - generic [ref=e20] [cursor=pointer]: Premium Tier ($9.99) - premium@moneyquest.com
+    - generic [ref=e22]:
+      - generic [ref=e23]:
+        - heading "Sign In" [level=3] [ref=e24]
+        - paragraph [ref=e25]: Enter your credentials or use a demo account above
+      - generic [ref=e26]:
+        - generic [ref=e27]:
+          - generic [ref=e28]:
+            - generic [ref=e29]: Email
+            - textbox "your@email.com" [disabled] [ref=e31]: free@moneyquest.com
+          - generic [ref=e32]:
+            - generic [ref=e33]: Password
+            - textbox "Enter your password" [disabled] [ref=e35]: free123
+        - generic [ref=e36]:
+          - button "Signing in..." [disabled] [ref=e37]:
+            - img [ref=e38]
+            - text: Signing in...
+          - paragraph [ref=e42]:
+            - text: Don't have an account?
+            - button "Sign up" [ref=e43] [cursor=pointer]
+    - generic [ref=e44]:
+      - heading "What you'll get:" [level=3] [ref=e45]
+      - generic [ref=e46]:
+        - generic [ref=e47]: Transaction Splitting
+        - generic [ref=e48]: Real-time Analytics
+        - generic [ref=e49]: Budget Tracking
+        - generic [ref=e50]: Local-first
+        - generic [ref=e51]: GDPR Compliant
+  - alert [ref=e52]
+```

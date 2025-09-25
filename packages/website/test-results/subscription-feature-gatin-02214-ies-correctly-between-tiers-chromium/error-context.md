@@ -1,0 +1,46 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - alert [ref=e2]
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - heading "Sign In" [level=1] [ref=e6]
+      - paragraph [ref=e7]: Welcome to MoneyQuestV3 - Sign in to your personal finance dashboard
+    - generic [ref=e8]:
+      - generic [ref=e9]:
+        - heading "Demo Accounts" [level=5] [ref=e10]
+        - paragraph [ref=e11]: Try different subscription tiers
+      - generic [ref=e13]:
+        - button "Free Tier - free@moneyquest.com" [ref=e14] [cursor=pointer]:
+          - generic [ref=e15] [cursor=pointer]: Free Tier - free@moneyquest.com
+        - button "Plus Tier ($2.99) - plus@moneyquest.com" [ref=e17] [cursor=pointer]:
+          - generic [ref=e18] [cursor=pointer]: Plus Tier ($2.99) - plus@moneyquest.com
+        - button "Premium Tier ($9.99) - premium@moneyquest.com" [ref=e20] [cursor=pointer]:
+          - generic [ref=e21] [cursor=pointer]: Premium Tier ($9.99) - premium@moneyquest.com
+    - generic [ref=e23]:
+      - generic [ref=e24]:
+        - heading "Sign In" [level=3] [ref=e25]
+        - paragraph [ref=e26]: Enter your credentials or use a demo account above
+      - generic [ref=e27]:
+        - generic [ref=e28]:
+          - generic [ref=e29]:
+            - generic [ref=e30]: Email
+            - textbox "your@email.com" [ref=e32]
+          - generic [ref=e33]:
+            - generic [ref=e34]: Password
+            - textbox "Enter your password" [ref=e36]
+        - generic [ref=e37]:
+          - button "Sign In" [ref=e38] [cursor=pointer]
+          - paragraph [ref=e40]:
+            - text: Don't have an account?
+            - button "Sign up" [ref=e41] [cursor=pointer]
+    - generic [ref=e42]:
+      - heading "What you'll get:" [level=3] [ref=e43]
+      - generic [ref=e44]:
+        - generic [ref=e45]: Transaction Splitting
+        - generic [ref=e46]: Real-time Analytics
+        - generic [ref=e47]: Budget Tracking
+        - generic [ref=e48]: Local-first
+        - generic [ref=e49]: GDPR Compliant
+```
